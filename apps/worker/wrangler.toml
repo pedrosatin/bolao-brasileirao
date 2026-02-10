@@ -11,5 +11,5 @@ CORS_ORIGINS = "http://localhost:5173,https://bolao-brasileirao.pages.dev"
 [[d1_databases]]
 binding = "DB"
 database_name = "bolao-brasileirao"
-database_id = ""
+database_id = "28b1c613-f137-4b15-afa9-ff3250025127"
 migrations_dir = "migrations"

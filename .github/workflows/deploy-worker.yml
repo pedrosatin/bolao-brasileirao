@@ -22,38 +22,11 @@ jobs:
         working-directory: apps/worker
         run: npm install
 
-      - name: Configure D1 database_id (from GitHub)
-        working-directory: apps/worker
-        env:
-          D1_DATABASE_ID: ${{ secrets.CLOUDFLARE_D1_DATABASE_ID || vars.CLOUDFLARE_D1_DATABASE_ID }}
-        run: |
-          if [ -n "$D1_DATABASE_ID" ]; then
-            python3 - <<'PY'
-import os
-import re
-from pathlib import Path
-
-path = Path("wrangler.toml")
-text = path.read_text(encoding="utf-8")
-database_id = os.environ.get("D1_DATABASE_ID", "").strip()
-if not database_id:
-  raise SystemExit(0)
-
-updated = re.sub(
-  r'(?m)^database_id\s*=\s*"[^"]*"\s*$',
-  f'database_id = "{database_id}"',
-  text,
-)
-path.write_text(updated, encoding="utf-8")
-print("Configured D1 database_id in wrangler.toml")
-PY
-          fi
-
       - name: Check D1 database_id is set
         working-directory: apps/worker
         run: |
           if grep -Eq '^database_id\s*=\s*""\s*$' wrangler.toml; then
-            echo "Missing D1 database_id. Set apps/worker/wrangler.toml OR define GitHub Actions variable CLOUDFLARE_D1_DATABASE_ID."
+            echo "Missing D1 database_id. Set apps/worker/wrangler.toml (d1_databases.database_id)."
             exit 1
           fi
 
