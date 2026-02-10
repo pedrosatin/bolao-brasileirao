@@ -29,24 +29,24 @@ jobs:
         run: |
           if [ -n "$D1_DATABASE_ID" ]; then
             python3 - <<'PY'
-            import os
-            import re
-            from pathlib import Path
+import os
+import re
+from pathlib import Path
 
-            path = Path("wrangler.toml")
-            text = path.read_text(encoding="utf-8")
-            database_id = os.environ.get("D1_DATABASE_ID", "").strip()
-            if not database_id:
-              raise SystemExit(0)
+path = Path("wrangler.toml")
+text = path.read_text(encoding="utf-8")
+database_id = os.environ.get("D1_DATABASE_ID", "").strip()
+if not database_id:
+  raise SystemExit(0)
 
-            updated = re.sub(
-              r'(?m)^database_id\s*=\s*"[^"]*"\s*$',
-              f'database_id = "{database_id}"',
-              text,
-            )
-            path.write_text(updated, encoding="utf-8")
-            print("Configured D1 database_id in wrangler.toml")
-            PY
+updated = re.sub(
+  r'(?m)^database_id\s*=\s*"[^"]*"\s*$',
+  f'database_id = "{database_id}"',
+  text,
+)
+path.write_text(updated, encoding="utf-8")
+print("Configured D1 database_id in wrangler.toml")
+PY
           fi
 
       - name: Check D1 database_id is set
@@ -69,4 +69,4 @@ jobs:
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID || vars.CLOUDFLARE_ACCOUNT_ID }}
-        run: npx wrangler deploy --var FOOTBALL_DATA_COMPETITION_ID=2013 --var FOOTBALL_DATA_BASE_URL=https://api.football-data.org/v4 --var DEFAULT_EXTERNAL_LINK=https://g1.globo.com/futebol/brasileirao-serie-a/
+        run: npx wrangler deploy --var FOOTBALL_DATA_COMPETITION_ID=2013 --var FOOTBALL_DATA_BASE_URL=https://api.football-data.org/v4 --var DEFAULT_EXTERNAL_LINK=https://g1.globo.com/futebol/brasileirao-serie-a/ --var CORS_ORIGINS=https://bolao-brasileirao.pages.dev
