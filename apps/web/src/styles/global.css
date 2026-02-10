@@ -1,0 +1,30 @@
+:root {
+  font-family:
+    'Inter',
+    system-ui,
+    -apple-system,
+    sans-serif;
+  color: #0f172a;
+  background-color: #f8fafc;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+a {
+  color: inherit;
+}
+
+button {
+  border: none;
+  cursor: pointer;
+}
+
+input {
+  font: inherit;
+}

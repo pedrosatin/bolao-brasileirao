@@ -1,0 +1,95 @@
+# API
+
+## Base URL
+
+- `https://api.seudominio.com`
+
+## Endpoints
+
+### `GET /`
+
+Retorna status básico e lista de endpoints.
+
+### `GET /health`
+
+Healthcheck simples.
+
+### `GET /rounds/next`
+
+Retorna a próxima rodada com partidas.
+
+**Response (200)**
+
+```json
+{
+  "round": {
+    "id": 12,
+    "season": 2026,
+    "roundNumber": 5,
+    "cutoffAt": "2026-02-11T20:00:00Z"
+  },
+  "matches": [
+    {
+      "id": 999,
+      "utcDate": "2026-02-12T00:00:00Z",
+      "status": "SCHEDULED",
+      "homeTeam": "Palmeiras",
+      "awayTeam": "Flamengo",
+      "externalLink": "https://g1.globo.com/"
+    }
+  ]
+}
+```
+
+### `GET /rounds/:id`
+
+Retorna detalhes de uma rodada específica.
+
+### `GET /rounds/:id/predictions`
+
+Retorna os palpites da rodada com os jogos correspondentes.
+
+### `POST /rounds/:id/recalculate`
+
+Recalcula pontuações da rodada com base nos placares salvos.
+
+### `GET /rounds/history`
+
+Retorna o histórico de rodadas já finalizadas.
+
+**Query params**
+
+- `includeActive=true`: inclui a rodada atual ainda não finalizada.
+
+### `POST /predictions`
+
+Cria palpites para uma rodada.
+
+**Request**
+
+```json
+{
+  "roundId": 12,
+  "participantName": "Pedro",
+  "predictions": [{ "matchId": 999, "home": 1, "away": 2 }]
+}
+```
+
+**Rules**
+
+- Rejeitar se `now > cutoff_at`.
+- Rejeitar se já existir palpite do mesmo nome na rodada.
+
+### `GET /rankings/round/:id`
+
+Ranking da rodada.
+
+### `GET /rankings/global`
+
+Ranking geral.
+
+## Erros comuns
+
+- `400`: payload inválido
+- `409`: nome já usado na rodada
+- `423`: palpites encerrados

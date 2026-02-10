@@ -1,0 +1,126 @@
+import { Env } from "./index";
+import { jsonResponse, errorResponse, withCors, parseJsonBody } from "./http";
+import {
+  getNextRound,
+  getRoundById,
+  getRoundHistory,
+  getRoundPredictions,
+  recalculateRoundScores,
+  createPredictions,
+  getRoundRanking,
+  getGlobalRanking
+} from "./handlers";
+
+type Handler = (
+  request: Request,
+  env: Env,
+  ctx: ExecutionContext,
+  params: Record<string, string>
+) => Promise<Response>;
+
+type Route = {
+  method: string;
+  pattern: URLPattern;
+  handler: Handler;
+};
+
+const routes: Route[] = [
+  {
+    method: "GET",
+    pattern: new URLPattern({ pathname: "/" }),
+    handler: async () =>
+      jsonResponse({
+        name: "bolao-brasileirao-api",
+        status: "ok",
+        endpoints: [
+          "/rounds/next",
+          "/rounds/history",
+          "/rounds/:id",
+          "/predictions",
+          "/rankings/round/:id",
+          "/rankings/global"
+        ]
+      })
+  },
+  {
+    method: "GET",
+    pattern: new URLPattern({ pathname: "/health" }),
+    handler: async () => jsonResponse({ status: "ok" })
+  },
+  {
+    method: "GET",
+    pattern: new URLPattern({ pathname: "/rounds/next" }),
+    handler: (request, env, ctx) => getNextRound(request, env, ctx)
+  },
+  {
+    method: "GET",
+    pattern: new URLPattern({ pathname: "/rounds/history" }),
+    handler: (request, env, ctx) => getRoundHistory(request, env, ctx)
+  },
+  {
+    method: "GET",
+    pattern: new URLPattern({ pathname: "/rounds/:id" }),
+    handler: (request, env, ctx, params) => getRoundById(request, env, ctx, params)
+  },
+  {
+    method: "GET",
+    pattern: new URLPattern({ pathname: "/rounds/:id/predictions" }),
+    handler: (request, env, ctx, params) =>
+      getRoundPredictions(request, env, ctx, params)
+  },
+  {
+    method: "POST",
+    pattern: new URLPattern({ pathname: "/rounds/:id/recalculate" }),
+    handler: (request, env, ctx, params) =>
+      recalculateRoundScores(request, env, ctx, params)
+  },
+  {
+    method: "POST",
+    pattern: new URLPattern({ pathname: "/predictions" }),
+    handler: async (request, env, ctx) => {
+      const body = await parseJsonBody(request);
+      return createPredictions(request, env, ctx, body);
+    }
+  },
+  {
+    method: "GET",
+    pattern: new URLPattern({ pathname: "/rankings/round/:id" }),
+    handler: (request, env, ctx, params) => getRoundRanking(request, env, ctx, params)
+  },
+  {
+    method: "GET",
+    pattern: new URLPattern({ pathname: "/rankings/global" }),
+    handler: (request, env, ctx) => getGlobalRanking(request, env, ctx)
+  }
+];
+
+export async function handleRequest(
+  request: Request,
+  env: Env,
+  ctx: ExecutionContext
+): Promise<Response> {
+  const url = new URL(request.url);
+
+  if (request.method === "OPTIONS") {
+    return withCors(new Response(null, { status: 204 }));
+  }
+
+  for (const route of routes) {
+    if (route.method !== request.method) {
+      continue;
+    }
+
+    const match = route.pattern.exec({ pathname: url.pathname });
+    if (!match) {
+      continue;
+    }
+
+    const params = match.pathname.groups ?? {};
+    const response = await route.handler(request, env, ctx, params);
+    return withCors(response);
+  }
+
+  return withCors(errorResponse("Not Found", 404));
+}
+
+export { jsonResponse };

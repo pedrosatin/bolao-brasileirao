@@ -1,0 +1,27 @@
+# OS
+.DS_Store
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Env files
+.env
+.env.*
+.dev.vars
+
+# Build outputs
+/dist
+/build
+/.wrangler
+/apps/worker/.wrangler/
+
+# Coverage
+/coverage
+
+# Editor
+.vscode/
+*.swp
