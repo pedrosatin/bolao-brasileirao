@@ -102,7 +102,15 @@ export async function handleRequest(
   const url = new URL(request.url);
 
   if (request.method === "OPTIONS") {
-    return withCors(new Response(null, { status: 204 }));
+    const requestOrigin = request.headers.get("Origin");
+    const preflight = withCors(request, env, new Response(null, { status: 204 }));
+    const allowOrigin = preflight.headers.get("Access-Control-Allow-Origin");
+
+    if (requestOrigin && !allowOrigin) {
+      return withCors(request, env, errorResponse("CORS origin not allowed", 403));
+    }
+
+    return preflight;
   }
 
   for (const route of routes) {
@@ -117,10 +125,10 @@ export async function handleRequest(
 
     const params = match.pathname.groups ?? {};
     const response = await route.handler(request, env, ctx, params);
-    return withCors(response);
+    return withCors(request, env, response);
   }
 
-  return withCors(errorResponse("Not Found", 404));
+  return withCors(request, env, errorResponse("Not Found", 404));
 }
 
 export { jsonResponse };

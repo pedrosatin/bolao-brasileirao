@@ -1,14 +1,46 @@
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type,Authorization"
+type CorsEnv = {
+  CORS_ORIGINS?: string;
 };
 
-export function withCors(response: Response): Response {
-  const newHeaders = new Headers(response.headers);
-  for (const [key, value] of Object.entries(corsHeaders)) {
-    newHeaders.set(key, value);
+function parseAllowedOrigins(value?: string): string[] {
+  if (!value) {
+    return ["*"];
   }
+
+  const origins = value
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+
+  return origins.length > 0 ? origins : ["*"];
+}
+
+function resolveCorsOrigin(requestOrigin: string | null, env: CorsEnv): string | null {
+  const allowed = parseAllowedOrigins(env.CORS_ORIGINS);
+  if (allowed.includes("*")) {
+    return "*";
+  }
+
+  if (!requestOrigin) {
+    return null;
+  }
+
+  return allowed.includes(requestOrigin) ? requestOrigin : null;
+}
+
+export function withCors(request: Request, env: CorsEnv, response: Response): Response {
+  const requestOrigin = request.headers.get("Origin");
+  const allowOrigin = resolveCorsOrigin(requestOrigin, env);
+
+  const newHeaders = new Headers(response.headers);
+  newHeaders.set("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
+  newHeaders.set("Access-Control-Allow-Headers", "Content-Type,Authorization");
+  newHeaders.set("Vary", "Origin");
+
+  if (allowOrigin) {
+    newHeaders.set("Access-Control-Allow-Origin", allowOrigin);
+  }
+
   return new Response(response.body, {
     status: response.status,
     statusText: response.statusText,
