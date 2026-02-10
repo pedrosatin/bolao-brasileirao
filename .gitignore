@@ -18,6 +18,7 @@ pnpm-debug.log*
 /build
 /.wrangler
 /apps/worker/.wrangler/
+/apps/web/dist/
 
 # Coverage
 /coverage

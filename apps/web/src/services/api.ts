@@ -1,6 +1,21 @@
 import { Match, RankingEntry, Round, RoundHistory, RoundPrediction } from "../types";
 
-const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:8787";
+function resolveApiBaseUrl(): string {
+  const configured = (import.meta.env.VITE_API_BASE_URL ?? "").trim();
+  if (configured) {
+    return configured.replace(/\/$/, "");
+  }
+
+  if (import.meta.env.DEV) {
+    return "http://localhost:8787";
+  }
+
+  throw new Error(
+    "Missing VITE_API_BASE_URL. Configure it to your Worker URL (e.g. https://bolao-brasileirao-api.<subdomain>.workers.dev)."
+  );
+}
+
+const baseUrl = resolveApiBaseUrl();
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
   const response = await fetch(`${baseUrl}${path}`, {
