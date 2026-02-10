@@ -11,10 +11,16 @@ Deploy automático via GitHub Actions para:
 
 Configure em **Settings → Secrets and variables → Actions**:
 
+**Secrets** (sensíveis):
+
 - `CLOUDFLARE_API_TOKEN` (token com permissões Workers + Pages)
+
+**Variables** (não sensíveis):
+
 - `CLOUDFLARE_ACCOUNT_ID`
 - `CLOUDFLARE_PAGES_PROJECT` (nome do projeto no Pages)
 - `VITE_API_BASE_URL` (URL pública do Worker, ex.: `https://api.seudominio.com`)
+- `CLOUDFLARE_D1_DATABASE_ID` (id do D1 usado no binding `DB`)
 
 ## Backend (Worker)
 
@@ -41,4 +47,7 @@ cd /Users/satin/Work/bolao-brasileirao/apps/worker
 npx wrangler d1 create bolao-brasileirao
 ```
 
-Depois, copie o `database_id` retornado e preencha em `apps/worker/wrangler.toml`.
+Depois, pegue o `database_id` retornado e escolha uma opção:
+
+- (Recomendado) Defina a GitHub Actions **Variable** `CLOUDFLARE_D1_DATABASE_ID` com esse valor.
+- Ou preencha `database_id` em `apps/worker/wrangler.toml`.
