@@ -25,24 +25,11 @@ export default function MatchCard({
         gap: '12px',
       }}
     >
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          gap: '12px',
-        }}
-      >
-        <div>
-          <strong>{match.homeTeam}</strong> x <strong>{match.awayTeam}</strong>
-          <div style={{ fontSize: '0.85rem', color: '#64748b' }}>
-            {formatDate(match.utcDate)}
-          </div>
+      <div>
+        <strong>{match.homeTeam}</strong> x <strong>{match.awayTeam}</strong>
+        <div style={{ fontSize: '0.85rem', color: '#64748b' }}>
+          {formatDate(match.utcDate)}
         </div>
-        {match.externalLink && (
-          <a href={match.externalLink} target="_blank" rel="noreferrer">
-            Escalação
-          </a>
-        )}
       </div>
 
       <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
