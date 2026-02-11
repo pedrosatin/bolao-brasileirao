@@ -9,7 +9,15 @@ import {
 } from "./footballData";
 import { getNextTuesdayCutoffUtcIso } from "./time";
 import { calculatePoints } from "./scoring";
-import { getMatchesByRoundId, getRoundBySeasonNumber, upsertMatch, upsertRound } from "./db";
+import {
+  deletePredictionsByRoundAndName,
+  getMatchesByRoundId,
+  getRoundBySeasonNumber,
+  getSubmissionTokenByRoundId,
+  upsertMatch,
+  upsertRound,
+  upsertSubmissionToken
+} from "./db";
 
 const DEFAULT_LINK = "https://g1.globo.com/futebol/brasileirao-serie-a/";
 
@@ -331,17 +339,22 @@ export async function recalculateRoundScores(
 }
 
 export async function createPredictions(
-  _request: Request,
+  request: Request,
   env: Env,
   _ctx: ExecutionContext,
   body: unknown
 ): Promise<Response> {
+  const originError = requireOriginAllowed(request, env);
+  if (originError) {
+    return originError;
+  }
+
   const payload = parsePredictionsPayload(body);
   if (!payload) {
     return errorResponse("Invalid payload", 400);
   }
 
-  const { participantName, predictions } = payload;
+  const { participantName, predictions, submissionToken } = payload;
   let roundId = payload.roundId;
 
   if (!roundId) {
@@ -363,6 +376,26 @@ export async function createPredictions(
 
   if (!round) {
     return errorResponse("Round not found", 404);
+  }
+
+  if (!submissionToken || submissionToken.trim().length < 10) {
+    return errorResponse("Submission token required", 401);
+  }
+
+  const tokenRow = await getSubmissionTokenByRoundId(env.DB, roundId);
+  if (!tokenRow) {
+    return errorResponse("Submission token not configured for this round", 403);
+  }
+
+  const now = new Date();
+  const expiresAt = new Date(tokenRow.expires_at);
+  if (Number.isNaN(expiresAt.getTime()) || now > expiresAt) {
+    return errorResponse("Submission token expired", 401);
+  }
+
+  const providedHash = await sha256Hex(submissionToken.trim());
+  if (providedHash !== tokenRow.token_hash) {
+    return errorResponse("Invalid submission token", 403);
   }
 
   const cutoff = new Date(round.cutoff_at);
@@ -408,6 +441,166 @@ export async function createPredictions(
     roundId,
     participantName
   }, 201);
+}
+
+function requireOriginAllowed(request: Request, env: Env): Response | null {
+  const origin = request.headers.get("Origin");
+  if (!origin) {
+    return null;
+  }
+
+  const allowed = parseAllowedOrigins(env.CORS_ORIGINS);
+  if (allowed.includes("*")) {
+    return null;
+  }
+
+  if (!allowed.includes(origin)) {
+    return errorResponse("Origin not allowed for this operation", 403);
+  }
+
+  return null;
+}
+
+function parseAllowedOrigins(value?: string): string[] {
+  if (!value) {
+    return ["*"];
+  }
+
+  const origins = value
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+
+  return origins.length > 0 ? origins : ["*"];
+}
+
+function requireAdmin(request: Request, env: Env): Response | null {
+  const expected = (env.ADMIN_TOKEN ?? "").trim();
+  if (!expected) {
+    console.error("ADMIN_TOKEN is not configured");
+    return errorResponse("Admin not configured", 500);
+  }
+
+  const provided = (request.headers.get("X-Admin-Token") ?? "").trim();
+  if (!provided || provided !== expected) {
+    return errorResponse("Unauthorized", 401);
+  }
+
+  return null;
+}
+
+function toHex(bytes: ArrayBuffer): string {
+  const array = new Uint8Array(bytes);
+  return Array.from(array)
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+async function sha256Hex(value: string): Promise<string> {
+  const data = new TextEncoder().encode(value);
+  const digest = await crypto.subtle.digest("SHA-256", data);
+  return toHex(digest);
+}
+
+function base64UrlEncode(bytes: Uint8Array): string {
+  let binary = "";
+  for (const b of bytes) {
+    binary += String.fromCharCode(b);
+  }
+  const base64 = btoa(binary);
+  return base64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+}
+
+export async function generateSubmissionToken(
+  request: Request,
+  env: Env,
+  _ctx: ExecutionContext,
+  params: Record<string, string>
+): Promise<Response> {
+  const originError = requireOriginAllowed(request, env);
+  if (originError) {
+    return originError;
+  }
+
+  const authError = requireAdmin(request, env);
+  if (authError) {
+    return authError;
+  }
+
+  const roundId = Number(params.id);
+  if (Number.isNaN(roundId)) {
+    return errorResponse("Invalid round id", 400);
+  }
+
+  const round = await env.DB
+    .prepare("SELECT cutoff_at FROM rounds WHERE id = ?")
+    .bind(roundId)
+    .first<{ cutoff_at: string }>();
+
+  if (!round) {
+    return errorResponse("Round not found", 404);
+  }
+
+  const tokenBytes = new Uint8Array(32);
+  crypto.getRandomValues(tokenBytes);
+  const token = base64UrlEncode(tokenBytes);
+  const tokenHash = await sha256Hex(token);
+
+  const nowIso = new Date().toISOString();
+  const expiresAt = round.cutoff_at;
+
+  await upsertSubmissionToken(
+    env.DB,
+    {
+      roundId,
+      tokenHash,
+      expiresAt
+    },
+    nowIso
+  );
+
+  return jsonResponse(
+    {
+      roundId,
+      submissionToken: token,
+      expiresAt
+    },
+    201
+  );
+}
+
+export async function adminDeletePredictionsByName(
+  request: Request,
+  env: Env,
+  _ctx: ExecutionContext,
+  params: Record<string, string>
+): Promise<Response> {
+  const originError = requireOriginAllowed(request, env);
+  if (originError) {
+    return originError;
+  }
+
+  const authError = requireAdmin(request, env);
+  if (authError) {
+    return authError;
+  }
+
+  const roundId = Number(params.id);
+  if (Number.isNaN(roundId)) {
+    return errorResponse("Invalid round id", 400);
+  }
+
+  const participantName = (params.name ?? "").trim();
+  if (participantName.length < 2) {
+    return errorResponse("Invalid participant name", 400);
+  }
+
+  const result = await deletePredictionsByRoundAndName(env.DB, roundId, participantName);
+  return jsonResponse({
+    roundId,
+    participantName,
+    ...result
+  });
 }
 
 export async function getRoundRanking(

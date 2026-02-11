@@ -70,3 +70,15 @@ CREATE TABLE IF NOT EXISTS scores (
 
 CREATE UNIQUE INDEX IF NOT EXISTS idx_scores_round_name
   ON scores (round_id, participant_name);
+
+CREATE TABLE IF NOT EXISTS submission_tokens (
+  round_id INTEGER PRIMARY KEY,
+  token_hash TEXT NOT NULL,
+  expires_at TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL,
+  FOREIGN KEY (round_id) REFERENCES rounds(id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_submission_tokens_expires_at
+  ON submission_tokens (expires_at);

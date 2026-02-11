@@ -8,6 +8,7 @@ export interface Env {
   FOOTBALL_DATA_COMPETITION_ID?: string;
   DEFAULT_EXTERNAL_LINK?: string;
   CORS_ORIGINS?: string;
+  ADMIN_TOKEN?: string;
 }
 
 export default {

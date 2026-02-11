@@ -23,6 +23,7 @@ export default function HomePage({
   onRefresh,
 }: HomePageProps) {
   const [name, setName] = useState('')
+  const [submissionToken, setSubmissionToken] = useState('')
   const [scores, setScores] = useState<
     Record<number, { home: number; away: number }>
   >({})
@@ -37,6 +38,7 @@ export default function HomePage({
 
   const canSubmit =
     name.trim().length > 1 &&
+    submissionToken.trim().length > 0 &&
     matches.length > 0 &&
     !cutoffReached &&
     !submitting
@@ -65,6 +67,11 @@ export default function HomePage({
       return
     }
 
+    if (submissionToken.trim().length === 0) {
+      setSubmitError('Informe o token de envio.')
+      return
+    }
+
     const predictions = matches.map((match) => {
       const value = scores[match.id] ?? initialScore
       return {
@@ -79,6 +86,7 @@ export default function HomePage({
       await submitPredictions({
         roundId: round.id,
         participantName: name.trim(),
+        submissionToken: submissionToken.trim(),
         predictions,
       })
       setSuccess('Palpites enviados com sucesso!')
@@ -136,6 +144,21 @@ export default function HomePage({
           value={name}
           onChange={(event) => setName(event.target.value)}
           placeholder="Seu nome"
+          style={{
+            padding: '10px',
+            borderRadius: '8px',
+            border: '1px solid #cbd5f5',
+          }}
+          disabled={cutoffReached}
+        />
+      </label>
+
+      <label style={{ display: 'grid', gap: '8px' }}>
+        Qual é a cor do cavalo branco de napoleão?
+        <input
+          value={submissionToken}
+          onChange={(event) => setSubmissionToken(event.target.value)}
+          placeholder="Resposta"
           style={{
             padding: '10px',
             borderRadius: '8px',

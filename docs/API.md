@@ -71,6 +71,7 @@ Cria palpites para uma rodada.
 {
   "roundId": 12,
   "participantName": "Pedro",
+  "submissionToken": "<token>",
   "predictions": [{ "matchId": 999, "home": 1, "away": 2 }]
 }
 ```
@@ -79,6 +80,21 @@ Cria palpites para uma rodada.
 
 - Rejeitar se `now > cutoff_at`.
 - Rejeitar se já existir palpite do mesmo nome na rodada.
+- Rejeitar se `submissionToken` não for válido/expirado para a rodada.
+
+### Admin
+
+Todos os endpoints abaixo exigem o header:
+
+- `X-Admin-Token: <ADMIN_TOKEN>`
+
+#### `POST /admin/rounds/:id/submission-token`
+
+Gera/rotaciona o token de envio da rodada (retorna o token em texto).
+
+#### `DELETE /admin/rounds/:id/predictions/:name`
+
+Deleta os palpites (`predictions`) e a linha de `scores` daquele participante na rodada.
 
 ### `GET /rankings/round/:id`
 

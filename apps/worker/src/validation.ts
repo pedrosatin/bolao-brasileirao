@@ -7,6 +7,7 @@ export type PredictionInput = {
 export type PredictionsPayload = {
   roundId?: number;
   participantName: string;
+  submissionToken?: string;
   predictions: PredictionInput[];
 };
 
@@ -19,6 +20,7 @@ export function parsePredictionsPayload(body: unknown): PredictionsPayload | nul
   const data = body as Record<string, unknown>;
   const participantName = data.participantName;
   const roundId = data.roundId;
+  const submissionToken = data.submissionToken;
   const predictions = data.predictions;
 
   if (typeof participantName !== "string" || participantName.trim().length < 2) {
@@ -55,9 +57,14 @@ export function parsePredictionsPayload(body: unknown): PredictionsPayload | nul
     return null;
   }
 
+  if (submissionToken !== undefined && typeof submissionToken !== "string") {
+    return null;
+  }
+
   return {
     roundId,
     participantName: participantName.trim(),
+    submissionToken: typeof submissionToken === "string" ? submissionToken.trim() : undefined,
     predictions: parsedPredictions
   };
 }

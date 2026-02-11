@@ -63,10 +63,38 @@ export async function fetchRoundPredictions(roundId: number): Promise<{
 export async function submitPredictions(payload: {
   roundId: number;
   participantName: string;
+  submissionToken: string;
   predictions: { matchId: number; home: number; away: number }[];
 }): Promise<{ message: string }> {
   return request("/predictions", {
     method: "POST",
     body: JSON.stringify(payload)
+  });
+}
+
+export async function adminGenerateSubmissionToken(
+  roundId: number,
+  adminToken: string
+): Promise<{ roundId: number; submissionToken: string; expiresAt: string }> {
+  return request(`/admin/rounds/${roundId}/submission-token`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Admin-Token": adminToken
+    }
+  });
+}
+
+export async function adminDeletePredictionsByName(
+  roundId: number,
+  participantName: string,
+  adminToken: string
+): Promise<{ roundId: number; participantName: string; deletedPredictions: number; deletedScoreRows: number }> {
+  return request(`/admin/rounds/${roundId}/predictions/${encodeURIComponent(participantName)}`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Admin-Token": adminToken
+    }
   });
 }

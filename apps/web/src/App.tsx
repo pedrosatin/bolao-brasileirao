@@ -4,11 +4,21 @@ import Tabs, { TabKey } from './components/Tabs'
 import HomePage from './pages/HomePage'
 import RankingsPage from './pages/RankingsPage'
 import HistoryPage from './pages/HistoryPage'
+import AdminPage from './pages/AdminPage'
 import { useRoundData } from './hooks/useRoundData'
 
 export default function App() {
+  const isAdminRoute = window.location.pathname === '/admin'
   const [activeTab, setActiveTab] = useState<TabKey>('home')
   const { round, matches, loading, error, refresh } = useRoundData()
+
+  if (isAdminRoute) {
+    return (
+      <Layout>
+        <AdminPage />
+      </Layout>
+    )
+  }
 
   const content = useMemo(() => {
     if (activeTab === 'home') {

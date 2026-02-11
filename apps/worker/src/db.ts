@@ -19,6 +19,12 @@ export type MatchRow = {
   external_link: string | null;
 };
 
+export type SubmissionTokenRow = {
+  round_id: number;
+  token_hash: string;
+  expires_at: string;
+};
+
 export async function getRoundBySeasonNumber(
   db: D1Database,
   season: number,
@@ -92,4 +98,51 @@ export async function getMatchesByRoundId(db: D1Database, roundId: number): Prom
     .all<MatchRow>();
 
   return result.results ?? [];
+}
+
+export async function upsertSubmissionToken(
+  db: D1Database,
+  input: { roundId: number; tokenHash: string; expiresAt: string },
+  nowIso: string
+): Promise<void> {
+  await db
+    .prepare(
+      "INSERT INTO submission_tokens (round_id, token_hash, expires_at, created_at, updated_at) VALUES (?, ?, ?, ?, ?) " +
+      "ON CONFLICT(round_id) DO UPDATE SET token_hash = excluded.token_hash, expires_at = excluded.expires_at, updated_at = excluded.updated_at"
+    )
+    .bind(input.roundId, input.tokenHash, input.expiresAt, nowIso, nowIso)
+    .run();
+}
+
+export async function getSubmissionTokenByRoundId(
+  db: D1Database,
+  roundId: number
+): Promise<SubmissionTokenRow | null> {
+  const row = await db
+    .prepare("SELECT round_id, token_hash, expires_at FROM submission_tokens WHERE round_id = ?")
+    .bind(roundId)
+    .first<SubmissionTokenRow>();
+
+  return row ?? null;
+}
+
+export async function deletePredictionsByRoundAndName(
+  db: D1Database,
+  roundId: number,
+  participantName: string
+): Promise<{ deletedPredictions: number; deletedScoreRows: number }> {
+  const deletePredictionsResult = await db
+    .prepare("DELETE FROM predictions WHERE round_id = ? AND participant_name = ?")
+    .bind(roundId, participantName)
+    .run();
+
+  const deleteScoreResult = await db
+    .prepare("DELETE FROM scores WHERE round_id = ? AND participant_name = ?")
+    .bind(roundId, participantName)
+    .run();
+
+  return {
+    deletedPredictions: deletePredictionsResult.meta.changes ?? 0,
+    deletedScoreRows: deleteScoreResult.meta.changes ?? 0
+  };
 }

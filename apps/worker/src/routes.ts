@@ -7,6 +7,8 @@ import {
   getRoundPredictions,
   recalculateRoundScores,
   createPredictions,
+  generateSubmissionToken,
+  adminDeletePredictionsByName,
   getRoundRanking,
   getGlobalRanking
 } from "./handlers";
@@ -81,6 +83,17 @@ const routes: Route[] = [
       const body = await parseJsonBody(request);
       return createPredictions(request, env, ctx, body);
     }
+  },
+  {
+    method: "POST",
+    pattern: new URLPattern({ pathname: "/admin/rounds/:id/submission-token" }),
+    handler: (request, env, ctx, params) => generateSubmissionToken(request, env, ctx, params)
+  },
+  {
+    method: "DELETE",
+    pattern: new URLPattern({ pathname: "/admin/rounds/:id/predictions/:name" }),
+    handler: (request, env, ctx, params) =>
+      adminDeletePredictionsByName(request, env, ctx, params)
   },
   {
     method: "GET",

@@ -14,6 +14,7 @@ Configure em **Settings → Secrets and variables → Actions**:
 **Secrets** (sensíveis):
 
 - `CLOUDFLARE_API_TOKEN` (token com permissões Workers + Pages)
+- `WORKER_ADMIN_TOKEN` (segredo para endpoints admin; sincroniza como `ADMIN_TOKEN` no Worker)
 
 **Variables** (não sensíveis):
 
@@ -28,6 +29,7 @@ Workflow: `.github/workflows/deploy-worker.yml`
 
 - Deploy automático em push para `main` quando arquivos de `apps/worker/**` mudam.
 - Variáveis padrão são definidas no comando do workflow.
+- Se `WORKER_ADMIN_TOKEN` estiver definido, o workflow sincroniza o secret `ADMIN_TOKEN` no Worker.
 
 ## Frontend (Pages)
 
