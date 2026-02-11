@@ -168,15 +168,24 @@ export default function HomePage({
         />
       </label>
 
-      {matches.map((match) => (
-        <MatchCard
-          key={match.id}
-          match={match}
-          value={scores[match.id] ?? initialScore}
-          onChange={handleScoreChange}
-          disabled={cutoffReached}
-        />
-      ))}
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns:
+            'repeat(auto-fit, minmax(min(400px, 100%), 1fr))',
+          gap: '16px',
+        }}
+      >
+        {matches.map((match) => (
+          <MatchCard
+            key={match.id}
+            match={match}
+            value={scores[match.id] ?? initialScore}
+            onChange={handleScoreChange}
+            disabled={cutoffReached}
+          />
+        ))}
+      </div>
 
       {submitError && <Alert type="error" message={submitError} />}
       {success && <Alert type="success" message={success} />}
