@@ -36,9 +36,11 @@ export default function HomePage({
     [round?.cutoffAt],
   )
 
+  const isDev = import.meta.env.DEV
+
   const canSubmit =
     name.trim().length > 1 &&
-    submissionToken.trim().length > 0 &&
+    (isDev || submissionToken.trim().length > 0) &&
     matches.length > 0 &&
     !cutoffReached &&
     !submitting
@@ -67,7 +69,7 @@ export default function HomePage({
       return
     }
 
-    if (submissionToken.trim().length === 0) {
+    if (submissionToken.trim().length === 0 && !isDev) {
       setSubmitError('Informe o token de envio.')
       return
     }

@@ -9,6 +9,7 @@ export interface Env {
   DEFAULT_EXTERNAL_LINK?: string;
   CORS_ORIGINS?: string;
   ADMIN_TOKEN?: string;
+  ENVIRONMENT?: string;
 }
 
 export default {

@@ -379,23 +379,26 @@ export async function createPredictions(
   }
 
   if (!submissionToken || submissionToken.trim().length < 10) {
-    return errorResponse("Submission token required", 401);
-  }
+    // Allow empty token only in development
+    if (env.ENVIRONMENT !== 'development') {
+      return errorResponse("Submission token required", 401);
+    }
+  } else {
+    const tokenRow = await getSubmissionTokenByRoundId(env.DB, roundId);
+    if (!tokenRow) {
+      return errorResponse("Submission token not configured for this round", 403);
+    }
 
-  const tokenRow = await getSubmissionTokenByRoundId(env.DB, roundId);
-  if (!tokenRow) {
-    return errorResponse("Submission token not configured for this round", 403);
-  }
+    const now = new Date();
+    const expiresAt = new Date(tokenRow.expires_at);
+    if (Number.isNaN(expiresAt.getTime()) || now > expiresAt) {
+      return errorResponse("Submission token expired", 401);
+    }
 
-  const now = new Date();
-  const expiresAt = new Date(tokenRow.expires_at);
-  if (Number.isNaN(expiresAt.getTime()) || now > expiresAt) {
-    return errorResponse("Submission token expired", 401);
-  }
-
-  const providedHash = await sha256Hex(submissionToken.trim());
-  if (providedHash !== tokenRow.token_hash) {
-    return errorResponse("Invalid submission token", 403);
+    const providedHash = await sha256Hex(submissionToken.trim());
+    if (providedHash !== tokenRow.token_hash) {
+      return errorResponse("Invalid submission token", 403);
+    }
   }
 
   const cutoff = new Date(round.cutoff_at);
