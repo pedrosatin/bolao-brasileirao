@@ -29,7 +29,7 @@ Interface simples e mobile-first para listar jogos, coletar palpites, exibir ran
 - **Palpites**: lista de jogos da rodada atual + formulário de palpites.
 - **Ranking**: ranking da rodada e geral.
 - **Histórico**: rodadas anteriores e resultados.
-- **Admin**: geração de tokens, remoção de palpites por nome e botão para forçar o recálculo (parcial) da pontuação da rodada usando `X-Admin-Token`.
+- **Admin**: geração de tokens, remoção de palpites por nome, sincronização manual de partidas finalizadas e botão para forçar o recálculo (parcial) da pontuação da rodada usando `X-Admin-Token`.
 
 ## Fluxo de dados
 

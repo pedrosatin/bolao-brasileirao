@@ -111,3 +111,13 @@ export async function adminRecalculateRound(
     }
   });
 }
+
+export async function adminSyncFinishedMatches(adminToken: string): Promise<{ message: string }> {
+  return request("/admin/sync-finished", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Admin-Token": adminToken
+    }
+  });
+}

@@ -9,6 +9,7 @@ import {
   createPredictions,
   generateSubmissionToken,
   adminDeletePredictionsByName,
+  adminSyncFinishedMatches,
   getRoundRanking,
   getGlobalRanking
 } from "./handlers";
@@ -94,6 +95,11 @@ const routes: Route[] = [
     pattern: new URLPattern({ pathname: "/admin/rounds/:id/predictions/:name" }),
     handler: (request, env, ctx, params) =>
       adminDeletePredictionsByName(request, env, ctx, params)
+  },
+  {
+    method: "POST",
+    pattern: new URLPattern({ pathname: "/admin/sync-finished" }),
+    handler: (request, env, ctx, params) => adminSyncFinishedMatches(request, env, ctx, params)
   },
   {
     method: "GET",

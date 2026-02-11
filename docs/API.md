@@ -93,6 +93,10 @@ Gera/rotaciona o token de envio da rodada (retorna o token em texto).
 
 Deleta os palpites (`predictions`) e a linha de `scores` daquele participante na rodada.
 
+#### `POST /admin/sync-finished`
+
+Executa manualmente a sincronização das partidas finalizadas usando a Football-Data para atualizar placares antes do recálculo. Requer `X-Admin-Token`.
+
 #### `POST /rounds/:id/recalculate`
 
 Força o recálculo dos pontos da rodada usando os placares já armazenados. Pode ser executado mesmo que a rodada ainda tenha partidas sem placar; apenas os jogos com `home_score`/`away_score` definidos são reprocessados. Requer o header `X-Admin-Token` e é o mesmo endpoint acionado pela página de Admin para liberar rapidamente resultados parciais após jogos concluídos.

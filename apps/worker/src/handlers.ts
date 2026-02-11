@@ -632,6 +632,29 @@ export async function adminDeletePredictionsByName(
   });
 }
 
+export async function adminSyncFinishedMatches(
+  request: Request,
+  env: Env,
+  _ctx: ExecutionContext,
+  _params: Record<string, string>
+): Promise<Response> {
+  const originError = requireOriginAllowed(request, env);
+  if (originError) {
+    return originError;
+  }
+
+  const authError = requireAdmin(request, env);
+  if (authError) {
+    return authError;
+  }
+
+  await syncFinishedMatchesAndScores(env);
+
+  return jsonResponse({
+    message: "Finished matches synced"
+  });
+}
+
 export async function getRoundRanking(
   _request: Request,
   env: Env,

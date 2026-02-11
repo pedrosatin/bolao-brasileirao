@@ -3,6 +3,7 @@ import Alert from '../components/Alert'
 import {
   adminDeletePredictionsByName,
   adminGenerateSubmissionToken,
+  adminSyncFinishedMatches,
   adminRecalculateRound,
 } from '../services/api'
 
@@ -19,7 +20,9 @@ export default function AdminPage() {
   const roundId = useMemo(() => Number(roundIdText), [roundIdText])
   const roundIdValid = !Number.isNaN(roundId) && roundId > 0
 
-  const canRun = adminToken.trim().length > 0 && roundIdValid && !loading
+  const adminTokenFilled = adminToken.trim().length > 0
+  const canRun = adminTokenFilled && roundIdValid && !loading
+  const canSync = adminTokenFilled && !loading
 
   const handleGenerateToken = async () => {
     setError(null)
@@ -75,6 +78,30 @@ export default function AdminPage() {
     } catch (err) {
       setError(
         err instanceof Error ? err.message : 'Erro ao deletar predictions',
+      )
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleSyncFinishedMatchesClick = async () => {
+    setError(null)
+    setSuccess(null)
+
+    if (!canSync) {
+      setError('Informe o ADMIN token.')
+      return
+    }
+
+    setLoading(true)
+    try {
+      const result = await adminSyncFinishedMatches(adminToken.trim())
+      setSuccess(`Sincronização finalizada: ${result.message}`)
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : 'Erro ao sincronizar partidas finalizadas',
       )
     } finally {
       setLoading(false)
@@ -198,6 +225,36 @@ export default function AdminPage() {
           )}
         </div>
       )}
+
+      <div
+        style={{
+          display: 'grid',
+          gap: '12px',
+          padding: '16px',
+          borderRadius: '12px',
+          border: '1px solid #e2e8f0',
+          background: '#f8fafc',
+        }}
+      >
+        <div style={{ fontWeight: 600 }}>Sincronizar partidas finalizadas</div>
+        <p style={{ margin: 0, fontSize: '14px', color: '#475569' }}>
+          Busca os resultados confirmados na Football-Data e atualiza as
+          partidas da rodada atual antes do recálculo.
+        </p>
+        <button
+          onClick={handleSyncFinishedMatchesClick}
+          disabled={!canSync}
+          style={{
+            padding: '12px 16px',
+            borderRadius: '12px',
+            background: canSync ? '#0ea5e9' : '#94a3b8',
+            color: '#fff',
+            fontWeight: 600,
+          }}
+        >
+          {loading ? 'Processando...' : 'Sincronizar resultados'}
+        </button>
+      </div>
 
       <div
         style={{
