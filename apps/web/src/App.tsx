@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import Layout from './components/Layout'
 import Tabs, { TabKey } from './components/Tabs'
 import HomePage from './pages/HomePage'
@@ -7,9 +7,15 @@ import HistoryPage from './pages/HistoryPage'
 import AdminPage from './pages/AdminPage'
 import { useRoundData } from './hooks/useRoundData'
 
+const getActiveTab = (pathname: string): TabKey => {
+  if (pathname === '/rankings') return 'rankings'
+  if (pathname === '/history') return 'history'
+  return 'home'
+}
+
 export default function App() {
   const isAdminRoute = window.location.pathname === '/admin'
-  const [activeTab, setActiveTab] = useState<TabKey>('home')
+  const activeTab = getActiveTab(window.location.pathname)
   const { round, matches, loading, error, refresh } = useRoundData()
 
   if (isAdminRoute) {
@@ -42,7 +48,7 @@ export default function App() {
 
   return (
     <Layout>
-      <Tabs activeTab={activeTab} onChange={setActiveTab} />
+      <Tabs activeTab={activeTab} />
       {content}
     </Layout>
   )

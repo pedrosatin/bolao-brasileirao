@@ -2,16 +2,15 @@ export type TabKey = 'home' | 'rankings' | 'history'
 
 type TabsProps = {
   activeTab: TabKey
-  onChange: (tab: TabKey) => void
 }
 
-const tabs: { key: TabKey; label: string }[] = [
-  { key: 'home', label: 'Palpites' },
-  { key: 'rankings', label: 'Ranking' },
-  { key: 'history', label: 'Histórico' },
+const tabs: { key: TabKey; label: string; href: string }[] = [
+  { key: 'home', label: 'Palpites', href: '/' },
+  { key: 'rankings', label: 'Ranking', href: '/rankings' },
+  { key: 'history', label: 'Histórico', href: '/history' },
 ]
 
-export default function Tabs({ activeTab, onChange }: TabsProps) {
+export default function Tabs({ activeTab }: TabsProps) {
   return (
     <div
       style={{
@@ -24,19 +23,22 @@ export default function Tabs({ activeTab, onChange }: TabsProps) {
       {tabs.map((tab) => {
         const isActive = tab.key === activeTab
         return (
-          <button
+          <a
             key={tab.key}
-            onClick={() => onChange(tab.key)}
+            href={tab.href}
             style={{
               padding: '10px 16px',
               borderRadius: '999px',
               background: isActive ? '#2563eb' : '#e2e8f0',
               color: isActive ? '#fff' : '#0f172a',
               fontWeight: 600,
+              textDecoration: 'none',
+              cursor: 'pointer',
+              display: 'inline-block',
             }}
           >
             {tab.label}
-          </button>
+          </a>
         )
       })}
     </div>
