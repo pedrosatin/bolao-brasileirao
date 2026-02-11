@@ -1,7 +1,16 @@
+const BRASILIA_OFFSET_MS = 3 * 60 * 60 * 1000;
+
+function toBrasiliaTime(date: Date): Date {
+  return new Date(date.getTime() - BRASILIA_OFFSET_MS);
+}
+
+function toUtcFromBrasilia(date: Date): Date {
+  return new Date(date.getTime() + BRASILIA_OFFSET_MS);
+}
+
 // Computes next Tuesday at 17:00 BRT, returning UTC ISO string.
 export function getNextTuesdayCutoffUtcIso(nowUtc: Date): string {
-  const offsetHours = 3;
-  const nowBrt = new Date(nowUtc.getTime() - offsetHours * 60 * 60 * 1000);
+  const nowBrt = toBrasiliaTime(nowUtc);
   const dayOfWeek = nowBrt.getDay();
   const tuesday = 2;
 
@@ -19,6 +28,19 @@ export function getNextTuesdayCutoffUtcIso(nowUtc: Date): string {
   cutoffBrt.setDate(cutoffBrt.getDate() + daysToAdd);
   cutoffBrt.setHours(17, 0, 0, 0);
 
-  const cutoffUtc = new Date(cutoffBrt.getTime() + offsetHours * 60 * 60 * 1000);
+  const cutoffUtc = toUtcFromBrasilia(cutoffBrt);
   return cutoffUtc.toISOString();
+}
+
+export function hasMatchStartedInBrasilia(utcDate: string, referenceDate: Date = new Date()): boolean {
+  if (!utcDate) {
+    return true;
+  }
+
+  const matchDate = new Date(utcDate);
+  if (Number.isNaN(matchDate.getTime())) {
+    return true;
+  }
+
+  return toBrasiliaTime(referenceDate).getTime() >= toBrasiliaTime(matchDate).getTime();
 }

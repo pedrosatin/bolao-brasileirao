@@ -78,9 +78,10 @@ Cria palpites para uma rodada.
 
 **Rules**
 
-- Rejeitar se `now > cutoff_at`.
+- Rejeitar palpites para jogos cujo status não seja `SCHEDULED`/`TIMED` ou cujo `utc_date` já tenha passado (comparação no fuso de Brasília / UTC-3).
 - Rejeitar se já existir palpite do mesmo nome na rodada.
 - Rejeitar se `submissionToken` não for válido/expirado para a rodada.
+  - Tokens vencem em `round.cutoff_at`.
 
 ### Admin
 
@@ -108,4 +109,4 @@ Ranking geral.
 
 - `400`: payload inválido
 - `409`: nome já usado na rodada
-- `423`: palpites encerrados
+- `423`: jogo já começou / status não permite palpite

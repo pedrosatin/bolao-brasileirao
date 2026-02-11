@@ -32,7 +32,7 @@ Interface simples e mobile-first para listar jogos, coletar palpites, exibir ran
 
 ## Fluxo de dados
 
-1. `GET /rounds/next` para jogos e `cutoffAt`.
+1. `GET /rounds/next` para jogos (com `utcDate` e `status`) e `cutoffAt`.
 2. `POST /predictions` para enviar palpites.
 3. `GET /rankings/round/:id` e `GET /rankings/global` para ranking.
 4. `GET /rounds/history` para histórico de rodadas.
@@ -44,5 +44,5 @@ Interface simples e mobile-first para listar jogos, coletar palpites, exibir ran
 ## UX
 
 - Validação de nome obrigatório.
-- Bloqueio local de envio após `cutoffAt`.
+- Inputs bloqueados individualmente quando o horário do jogo em Brasília (UTC-3) já passou ou o status não é mais `SCHEDULED/TIMED`.
 - Feedback visual para sucesso/erro.

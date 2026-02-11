@@ -7,7 +7,7 @@ import {
   fetchCompetition,
   fetchMatchesByMatchday
 } from "./footballData";
-import { getNextTuesdayCutoffUtcIso } from "./time";
+import { getNextTuesdayCutoffUtcIso, hasMatchStartedInBrasilia } from "./time";
 import { calculatePoints } from "./scoring";
 import {
   deletePredictionsByRoundAndName,
@@ -20,6 +20,7 @@ import {
 } from "./db";
 
 const DEFAULT_LINK = "https://g1.globo.com/futebol/brasileirao-serie-a/";
+const SCHEDULABLE_STATUSES = new Set(["SCHEDULED", "TIMED"]);
 
 export async function getNextRound(
   _request: Request,
@@ -369,12 +370,12 @@ export async function createPredictions(
     roundId = matchRow.round_id;
   }
 
-  const round = await env.DB
-    .prepare("SELECT cutoff_at FROM rounds WHERE id = ?")
+  const roundExists = await env.DB
+    .prepare("SELECT 1 as found FROM rounds WHERE id = ?")
     .bind(roundId)
-    .first<{ cutoff_at: string }>();
+    .first<{ found: number }>();
 
-  if (!round) {
+  if (!roundExists) {
     return errorResponse("Round not found", 404);
   }
 
@@ -401,11 +402,6 @@ export async function createPredictions(
     }
   }
 
-  const cutoff = new Date(round.cutoff_at);
-  if (new Date() > cutoff) {
-    return errorResponse("Predictions closed", 423);
-  }
-
   const existing = await env.DB
     .prepare("SELECT 1 FROM predictions WHERE round_id = ? AND participant_name = ? LIMIT 1")
     .bind(roundId, participantName)
@@ -416,19 +412,39 @@ export async function createPredictions(
   }
 
   const matchIds = predictions.map((prediction) => prediction.matchId);
+  if (matchIds.length === 0) {
+    return errorResponse("No predictions provided", 400);
+  }
   const placeholders = matchIds.map(() => "?").join(", ");
   const rows = await env.DB
     .prepare(
-      `SELECT id FROM matches WHERE round_id = ? AND id IN (${placeholders})`
+      `SELECT id, utc_date, status FROM matches WHERE round_id = ? AND id IN (${placeholders})`
     )
     .bind(roundId, ...matchIds)
-    .all<{ id: number }>();
+    .all<{ id: number; utc_date: string; status: string }>();
 
-  if ((rows.results ?? []).length !== matchIds.length) {
+  const fetchedMatches = rows.results ?? [];
+  if (fetchedMatches.length !== matchIds.length) {
     return errorResponse("One or more matches are invalid for this round", 400);
   }
 
-  const nowIso = new Date().toISOString();
+  const matchesById = new Map(fetchedMatches.map((match) => [match.id, match]));
+  const nowUtc = new Date();
+
+  for (const prediction of predictions) {
+    const match = matchesById.get(prediction.matchId);
+    if (!match) {
+      return errorResponse("One or more matches are invalid for this round", 400);
+    }
+
+    const status = (match.status ?? "").toUpperCase();
+    const statusLocked = !SCHEDULABLE_STATUSES.has(status);
+    if (statusLocked || hasMatchStartedInBrasilia(match.utc_date, nowUtc)) {
+      return errorResponse("One or more matches already started", 423);
+    }
+  }
+
+  const nowIso = nowUtc.toISOString();
   const statements = predictions.map((prediction) =>
     env.DB
       .prepare(

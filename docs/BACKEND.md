@@ -29,7 +29,7 @@ Fornecer API REST para jogos, palpites, ranking e histórico de rodadas usando D
 
 ## Regras
 
-- Palpites bloqueados após `cutoff_at` (terça 17h BRT em UTC).
+- Palpites bloqueados por jogo: o Worker rejeita envios com status diferente de `SCHEDULED/TIMED` ou cujo `utc_date` já passou considerando Brasília (UTC-3). `cutoff_at` permanece para expiração/geração de token e exibição.
 - Nomes únicos por rodada.
 - Pontuação centralizada em `scoring.ts`.
 - Cache de jogos: 6 dias via `rounds.last_sync_at`.

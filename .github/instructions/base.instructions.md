@@ -83,8 +83,8 @@ Frontend (React) ←→ Cloudflare Worker ←→ D1 Database
 
 ### Rounds & Matches
 
-- Each **round** has a `cutoff_at` timestamp (Tuesday 17:00 BRT = 20:00 UTC)
-- Predictions are locked after `cutoff_at`
+- Each **round** has a `cutoff_at` timestamp (Tuesday 17:00 BRT = 20:00 UTC) usado para exibição e expiração de token
+- Predictions are locked per match: status must be `SCHEDULED`/`TIMED` and kickoff (Brasília / UTC-3) must still be in the future
 - **Matches** linked to rounds store team names, scores, and status (SCHEDULED, IN_PLAY, FINISHED)
 - Match data synced from Football-Data.org with 6-day cache via `rounds.last_sync_at`
 
@@ -216,6 +216,7 @@ Frontend (React) ←→ Cloudflare Worker ←→ D1 Database
 - Cutoff time calculated from Tuesday 17:00 America/Sao_Paulo
 - Brazil timezone is GMT-3 (UTC-3)
 - Conversion: `cutoff = Tuesday 20:00 UTC`
+- Match locking compares `matches.utc_date` to "now" converted to Brasília time (UTC-3) on both frontend and backend
 
 ### Token Validation
 
@@ -346,7 +347,7 @@ wrangler deploy
 ### File Naming
 
 - Components: PascalCase (e.g., `MatchCard.tsx`)
-- Utilities: camelCase (e.g., `isAfterCutoff.ts`)
+- Utilities: camelCase (e.g., `hasMatchStarted.ts`)
 - Types: Keep in `/types/index.ts` or co-locate with usage
 - No index files unless necessary for exports
 

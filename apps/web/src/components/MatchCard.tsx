@@ -67,6 +67,12 @@ export default function MatchCard({
           }}
         />
       </div>
+
+      {disabled && (
+        <div style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
+          Palpite bloqueado (jogo já começou)
+        </div>
+      )}
     </div>
   )
 }

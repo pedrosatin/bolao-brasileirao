@@ -1,11 +1,22 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Match, Round } from '../types'
-import { isAfterCutoff } from '../utils/date'
+import { hasMatchStarted } from '../utils/date'
 import { submitPredictions } from '../services/api'
 import Alert from '../components/Alert'
 import MatchCard from '../components/MatchCard'
 
 const initialScore = { home: 0, away: 0 }
+
+const SCHEDULABLE_STATUSES = new Set(['SCHEDULED', 'TIMED'])
+
+function isMatchLocked(match: Match, referenceDate: Date): boolean {
+  const status = (match.status ?? '').toUpperCase()
+  if (!status || !SCHEDULABLE_STATUSES.has(status)) {
+    return true
+  }
+
+  return hasMatchStarted(match.utcDate, referenceDate)
+}
 
 type HomePageProps = {
   round: Round | null
@@ -30,22 +41,47 @@ export default function HomePage({
   const [submitting, setSubmitting] = useState(false)
   const [success, setSuccess] = useState<string | null>(null)
   const [submitError, setSubmitError] = useState<string | null>(null)
+  const [now, setNow] = useState(() => Date.now())
 
-  const cutoffReached = useMemo(
-    () => isAfterCutoff(round?.cutoffAt),
-    [round?.cutoffAt],
-  )
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return
+    }
+    const intervalId = window.setInterval(() => setNow(Date.now()), 30000)
+    return () => window.clearInterval(intervalId)
+  }, [])
 
   const isDev = import.meta.env.DEV
+
+  const matchLocks = useMemo(() => {
+    const referenceDate = new Date(now)
+    return matches.reduce<Record<number, boolean>>((acc, match) => {
+      acc[match.id] = isMatchLocked(match, referenceDate)
+      return acc
+    }, {})
+  }, [matches, now])
+
+  const openMatches = useMemo(
+    () => matches.filter((match) => !matchLocks[match.id]),
+    [matches, matchLocks],
+  )
+
+  const lockedCount = matches.length - openMatches.length
+  const lockedLabel = lockedCount === 1 ? 'jogo' : 'jogos'
+  const lockedVerb = lockedCount === 1 ? 'começou' : 'começaram'
+  const hasOpenMatches = openMatches.length > 0
 
   const canSubmit =
     name.trim().length > 1 &&
     (isDev || submissionToken.trim().length > 0) &&
-    matches.length > 0 &&
-    !cutoffReached &&
+    hasOpenMatches &&
     !submitting
 
   const handleScoreChange = (matchId: number, home: number, away: number) => {
+    if (matchLocks[matchId]) {
+      return
+    }
+
     setScores((current) => ({
       ...current,
       [matchId]: {
@@ -74,7 +110,12 @@ export default function HomePage({
       return
     }
 
-    const predictions = matches.map((match) => {
+    if (!hasOpenMatches) {
+      setSubmitError('Todos os jogos desta rodada já começaram.')
+      return
+    }
+
+    const predictions = openMatches.map((match) => {
       const value = scores[match.id] ?? initialScore
       return {
         matchId: match.id,
@@ -140,8 +181,18 @@ export default function HomePage({
         {new Date(round.cutoffAt).toLocaleString('pt-BR')}
       </div>
 
-      {cutoffReached && (
-        <Alert type="error" message="Palpites encerrados (após terça 17h)." />
+      {lockedCount > 0 && (
+        <Alert
+          type="info"
+          message={`${lockedCount} ${lockedLabel} já ${lockedVerb}. Palpites válidos apenas para os demais.`}
+        />
+      )}
+
+      {!hasOpenMatches && (
+        <Alert
+          type="info"
+          message="Todos os jogos desta rodada já começaram. Volte na próxima rodada."
+        />
       )}
 
       <label style={{ display: 'grid', gap: '8px' }}>
@@ -155,7 +206,6 @@ export default function HomePage({
             borderRadius: '8px',
             border: '1px solid #cbd5f5',
           }}
-          disabled={cutoffReached}
         />
       </label>
 
@@ -170,7 +220,6 @@ export default function HomePage({
             borderRadius: '8px',
             border: '1px solid #cbd5f5',
           }}
-          disabled={cutoffReached}
         />
       </label>
 
@@ -188,7 +237,7 @@ export default function HomePage({
             match={match}
             value={scores[match.id] ?? initialScore}
             onChange={handleScoreChange}
-            disabled={cutoffReached}
+            disabled={Boolean(matchLocks[match.id])}
           />
         ))}
       </div>

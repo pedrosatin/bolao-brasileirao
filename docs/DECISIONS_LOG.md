@@ -34,3 +34,8 @@
 
 - **Decisão**: Deploy automático via GitHub Actions para Cloudflare Workers e Pages.
   **Justificativa**: Automatizar releases e manter fluxo simples com repositório único.
+
+## 2026-02-11
+
+- **Decisão**: Trocar o bloqueio global por `cutoff` por um bloqueio por jogo usando horário de Brasília (UTC-3) no frontend e no Worker.
+  **Justificativa**: Permitir palpites em jogos futuros mesmo após terça-feira 17h e impedir manipulação manual para partidas já iniciadas.

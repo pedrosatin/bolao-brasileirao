@@ -6,9 +6,22 @@ export function formatDate(value: string): string {
   }).format(date);
 }
 
-export function isAfterCutoff(cutoffAt?: string | null): boolean {
-  if (!cutoffAt) {
+const BRASILIA_OFFSET_MS = 3 * 60 * 60 * 1000;
+
+function toBrasiliaTimestamp(date: Date): number {
+  return date.getTime() - BRASILIA_OFFSET_MS;
+}
+
+export function hasMatchStarted(utcDate: string, referenceDate?: Date): boolean {
+  if (!utcDate) {
     return false;
   }
-  return new Date() > new Date(cutoffAt);
+
+  const matchDate = new Date(utcDate);
+  if (Number.isNaN(matchDate.getTime())) {
+    return true;
+  }
+
+  const now = referenceDate ?? new Date();
+  return toBrasiliaTimestamp(now) >= toBrasiliaTimestamp(matchDate);
 }
