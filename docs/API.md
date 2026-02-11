@@ -95,7 +95,7 @@ Deleta os palpites (`predictions`) e a linha de `scores` daquele participante na
 
 #### `POST /rounds/:id/recalculate`
 
-Força o recálculo dos pontos da rodada usando os placares já armazenados. Requer o header `X-Admin-Token` e é o mesmo endpoint acionado pela página de Admin para liberar rapidamente resultados após jogos concluídos.
+Força o recálculo dos pontos da rodada usando os placares já armazenados. Pode ser executado mesmo que a rodada ainda tenha partidas sem placar; apenas os jogos com `home_score`/`away_score` definidos são reprocessados. Requer o header `X-Admin-Token` e é o mesmo endpoint acionado pela página de Admin para liberar rapidamente resultados parciais após jogos concluídos.
 
 ### `GET /rankings/round/:id`
 

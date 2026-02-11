@@ -205,7 +205,7 @@ Frontend (React) ←→ Cloudflare Worker ←→ D1 Database
 
 - `POST /admin/rounds/:id/submission-token` → Generate submission token (requires `X-Admin-Token`)
 - `DELETE /admin/rounds/:id/predictions/:name` → Delete participant predictions (requires `X-Admin-Token`)
-- `POST /rounds/:id/recalculate` → Force score recalculation for a round (requires `X-Admin-Token`, exposed in Admin page)
+- `POST /rounds/:id/recalculate` → Force score recalculation for finished matches in a round (requires `X-Admin-Token`, exposed in Admin page)
 
 ---
 

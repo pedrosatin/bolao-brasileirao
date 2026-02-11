@@ -289,17 +289,17 @@ export async function recalculateRoundScores(
     return errorResponse("Round not found", 404);
   }
 
-  const missingScores = (matches.results ?? []).some(
-    (match) => match.home_score === null || match.away_score === null
+  const finishedMatches = (matches.results ?? []).filter(
+    (match) => match.home_score !== null && match.away_score !== null
   );
 
-  if (missingScores) {
-    return errorResponse("All matches must have scores to recalculate", 400);
+  if (finishedMatches.length === 0) {
+    return errorResponse("No finished matches to recalculate", 400);
   }
 
   const nowIso = new Date().toISOString();
 
-  for (const match of matches.results ?? []) {
+  for (const match of finishedMatches) {
     await env.DB
       .prepare(
         "UPDATE matches SET status = 'FINISHED', updated_at = ? WHERE id = ?"
