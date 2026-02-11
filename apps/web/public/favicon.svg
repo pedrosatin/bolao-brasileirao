@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Background circle -->
+  <circle cx="50" cy="50" r="48" fill="#009C3B" stroke="#FFDF00" stroke-width="4"/>
+  
+  <!-- Soccer ball -->
+  <g transform="translate(50, 50)">
+    <!-- White circle for ball -->
+    <circle r="28" fill="white"/>
+    
+    <!-- Pentagon in center -->
+    <polygon points="0,-12 11.4,-3.7 7,-10.8 -7,-10.8 -11.4,-3.7" fill="black"/>
+    
+    <!-- Hexagons around -->
+    <polygon points="0,-12 11.4,-3.7 7,10.8 -7,10.8 -11.4,-3.7" fill="none" stroke="black" stroke-width="1.5"/>
+    <polygon points="11.4,-3.7 21,-10 28,-3" fill="none" stroke="black" stroke-width="1.5"/>
+    <polygon points="7,10.8 15,20 8,27" fill="none" stroke="black" stroke-width="1.5"/>
+    <polygon points="-7,10.8 -15,20 -8,27" fill="none" stroke="black" stroke-width="1.5"/>
+    <polygon points="-11.4,-3.7 -21,-10 -28,-3" fill="none" stroke="black" stroke-width="1.5"/>
+  </g>
+  
+  <!-- Trophy element at bottom -->
+  <path d="M 50 72 L 50 76 M 45 76 L 55 76" stroke="#FFDF00" stroke-width="2.5" stroke-linecap="round"/>
+</svg>
