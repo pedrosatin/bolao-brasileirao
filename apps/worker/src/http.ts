@@ -33,8 +33,8 @@ export function withCors(request: Request, env: CorsEnv, response: Response): Re
   const allowOrigin = resolveCorsOrigin(requestOrigin, env);
 
   const newHeaders = new Headers(response.headers);
-  newHeaders.set("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
-  newHeaders.set("Access-Control-Allow-Headers", "Content-Type,Authorization");
+  newHeaders.set("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
+  newHeaders.set("Access-Control-Allow-Headers", "Content-Type,Authorization,X-Admin-Token");
   newHeaders.set("Vary", "Origin");
 
   if (allowOrigin) {
