@@ -3,6 +3,7 @@ import Alert from '../components/Alert'
 import {
   adminDeletePredictionsByName,
   adminGenerateSubmissionToken,
+  adminRecalculateRound,
 } from '../services/api'
 
 export default function AdminPage() {
@@ -75,6 +76,28 @@ export default function AdminPage() {
       setError(
         err instanceof Error ? err.message : 'Erro ao deletar predictions',
       )
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleRecalculateRound = async () => {
+    setError(null)
+    setSuccess(null)
+
+    if (!canRun) {
+      setError('Informe ADMIN token e o id da rodada.')
+      return
+    }
+
+    setLoading(true)
+    try {
+      const result = await adminRecalculateRound(roundId, adminToken.trim())
+      setSuccess(
+        `Pontuação da rodada ${result.roundId} recalculada (${result.message}).`,
+      )
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erro ao recalcular pontos')
     } finally {
       setLoading(false)
     }
@@ -175,6 +198,36 @@ export default function AdminPage() {
           )}
         </div>
       )}
+
+      <div
+        style={{
+          display: 'grid',
+          gap: '12px',
+          padding: '16px',
+          borderRadius: '12px',
+          border: '1px solid #e2e8f0',
+          background: '#f8fafc',
+        }}
+      >
+        <div style={{ fontWeight: 600 }}>Reprocessar pontuação da rodada</div>
+        <p style={{ margin: 0, fontSize: '14px', color: '#475569' }}>
+          Força a leitura dos resultados gravados na rodada e recalcula os
+          pontos de todos os participantes.
+        </p>
+        <button
+          onClick={handleRecalculateRound}
+          disabled={!canRun}
+          style={{
+            padding: '12px 16px',
+            borderRadius: '12px',
+            background: canRun ? '#15803d' : '#94a3b8',
+            color: '#fff',
+            fontWeight: 600,
+          }}
+        >
+          {loading ? 'Processando...' : 'Recalcular pontuação'}
+        </button>
+      </div>
 
       <hr />
 

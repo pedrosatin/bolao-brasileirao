@@ -98,3 +98,16 @@ export async function adminDeletePredictionsByName(
     }
   });
 }
+
+export async function adminRecalculateRound(
+  roundId: number,
+  adminToken: string
+): Promise<{ roundId: number; message: string }> {
+  return request(`/rounds/${roundId}/recalculate`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Admin-Token": adminToken
+    }
+  });
+}

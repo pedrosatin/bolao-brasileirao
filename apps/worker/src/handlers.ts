@@ -258,11 +258,21 @@ export async function getRoundPredictions(
 }
 
 export async function recalculateRoundScores(
-  _request: Request,
+  request: Request,
   env: Env,
   _ctx: ExecutionContext,
   params: Record<string, string>
 ): Promise<Response> {
+  const originError = requireOriginAllowed(request, env);
+  if (originError) {
+    return originError;
+  }
+
+  const authError = requireAdmin(request, env);
+  if (authError) {
+    return authError;
+  }
+
   const roundId = Number(params.id);
   if (Number.isNaN(roundId)) {
     return errorResponse("Invalid round id", 400);

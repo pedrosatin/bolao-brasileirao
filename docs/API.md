@@ -49,10 +49,6 @@ Retorna detalhes de uma rodada específica.
 
 Retorna os palpites da rodada com os jogos correspondentes.
 
-### `POST /rounds/:id/recalculate`
-
-Recalcula pontuações da rodada com base nos placares salvos.
-
 ### `GET /rounds/history`
 
 Retorna o histórico de rodadas já finalizadas.
@@ -96,6 +92,10 @@ Gera/rotaciona o token de envio da rodada (retorna o token em texto).
 #### `DELETE /admin/rounds/:id/predictions/:name`
 
 Deleta os palpites (`predictions`) e a linha de `scores` daquele participante na rodada.
+
+#### `POST /rounds/:id/recalculate`
+
+Força o recálculo dos pontos da rodada usando os placares já armazenados. Requer o header `X-Admin-Token` e é o mesmo endpoint acionado pela página de Admin para liberar rapidamente resultados após jogos concluídos.
 
 ### `GET /rankings/round/:id`
 
