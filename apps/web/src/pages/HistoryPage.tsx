@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   fetchHistory,
   fetchRankings,
@@ -62,6 +62,30 @@ export default function HistoryPage() {
     loadRanking()
   }, [selectedRound])
 
+  const groupedPredictions = useMemo(() => {
+    const groups = predictions.reduce<Record<string, RoundPrediction[]>>(
+      (acc, item) => {
+        if (!acc[item.participantName]) {
+          acc[item.participantName] = []
+        }
+        acc[item.participantName].push(item)
+        return acc
+      },
+      {},
+    )
+
+    return Object.entries(groups)
+      .map(([participant, items]) => ({ participant, items }))
+      .sort((a, b) => a.participant.localeCompare(b.participant))
+  }, [predictions])
+
+  const formatScore = (home: number | null, away: number | null) => {
+    if (home === null || away === null) {
+      return '—'
+    }
+    return `${home} x ${away}`
+  }
+
   if (loading) {
     return <p>Carregando histórico...</p>
   }
@@ -120,49 +144,157 @@ export default function HistoryPage() {
       {selectedRound && (
         <div style={{ display: 'grid', gap: '12px' }}>
           <h3>Palpites da rodada</h3>
-          {predictions.length === 0 ? (
+          {groupedPredictions.length === 0 ? (
             <p>Nenhum palpite encontrado.</p>
           ) : (
-            Object.entries(
-              predictions.reduce<Record<string, RoundPrediction[]>>(
-                (acc, item) => {
-                  if (!acc[item.participantName]) {
-                    acc[item.participantName] = []
-                  }
-                  acc[item.participantName].push(item)
-                  return acc
-                },
-                {},
-              ),
-            ).map(([participant, items]) => (
-              <div
-                key={participant}
-                style={{
-                  background: '#ffffff',
-                  padding: '12px',
-                  borderRadius: '12px',
-                }}
-              >
-                <strong>{participant}</strong>
-                <ul style={{ margin: '8px 0 0', paddingLeft: '20px' }}>
-                  {items.map((item) => (
-                    <li key={`${participant}-${item.matchId}`}>
-                      {item.homeTeam} {item.predHome} x {item.predAway}{' '}
-                      {item.awayTeam}
-                      {item.homeScore !== null && item.awayScore !== null && (
-                        <>
-                          {' '}
-                          — Resultado: {item.homeScore} x {item.awayScore}
-                        </>
-                      )}
-                      {typeof item.points === 'number' && (
-                        <span> — {item.points} pts</span>
-                      )}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))
+            <div
+              style={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: '16px',
+                justifyContent: 'center',
+              }}
+            >
+              {groupedPredictions.map(({ participant, items }) => (
+                <div
+                  key={participant}
+                  style={{
+                    background: '#ffffff',
+                    padding: '16px',
+                    borderRadius: '16px',
+                    boxShadow: '0 2px 6px rgba(15, 23, 42, 0.08)',
+                    flex: '1 1 320px',
+                    maxWidth: '600px',
+                    width: '100%',
+                  }}
+                >
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'baseline',
+                      gap: '8px',
+                      flexWrap: 'wrap',
+                    }}
+                  >
+                    <strong style={{ fontSize: '1rem' }}>{participant}</strong>
+                    <span style={{ color: '#64748b', fontSize: '0.85rem' }}>
+                      {items.length} {items.length === 1 ? 'jogo' : 'jogos'}
+                    </span>
+                  </div>
+                  <div style={{ overflowX: 'auto', marginTop: '12px' }}>
+                    <table
+                      style={{ width: '100%', borderCollapse: 'collapse' }}
+                    >
+                      <thead>
+                        <tr
+                          style={{
+                            textAlign: 'left',
+                            color: '#475569',
+                            fontSize: '0.8rem',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.04em',
+                          }}
+                        >
+                          <th
+                            style={{
+                              paddingBottom: '8px',
+                              borderBottom: '1px solid #e2e8f0',
+                              width: '45%',
+                            }}
+                          >
+                            Jogo
+                          </th>
+                          <th
+                            style={{
+                              paddingBottom: '8px',
+                              borderBottom: '1px solid #e2e8f0',
+                              width: '20%',
+                            }}
+                          >
+                            Palpite
+                          </th>
+                          <th
+                            style={{
+                              paddingBottom: '8px',
+                              borderBottom: '1px solid #e2e8f0',
+                              width: '15%',
+                            }}
+                          >
+                            Resultado
+                          </th>
+                          <th
+                            style={{
+                              paddingBottom: '8px',
+                              borderBottom: '1px solid #e2e8f0',
+                              width: '20%',
+                              textAlign: 'right',
+                            }}
+                          >
+                            Pts
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {items.map((item, index) => {
+                          const borderStyle =
+                            index === items.length - 1
+                              ? 'none'
+                              : '1px solid #f1f5f9'
+
+                          return (
+                            <tr key={`${participant}-${item.matchId}`}>
+                              <td
+                                style={{
+                                  padding: '10px 0',
+                                  borderBottom: borderStyle,
+                                  fontWeight: 500,
+                                }}
+                              >
+                                {item.homeTeam} x {item.awayTeam}
+                              </td>
+                              <td
+                                style={{
+                                  padding: '10px 0',
+                                  borderBottom: borderStyle,
+                                  color: '#0f172a',
+                                  fontVariantNumeric: 'tabular-nums',
+                                }}
+                              >
+                                {item.predHome} x {item.predAway}
+                              </td>
+                              <td
+                                style={{
+                                  padding: '10px 0',
+                                  borderBottom: borderStyle,
+                                  color: '#0f172a',
+                                  fontVariantNumeric: 'tabular-nums',
+                                }}
+                              >
+                                {formatScore(item.homeScore, item.awayScore)}
+                              </td>
+                              <td
+                                style={{
+                                  padding: '10px 0',
+                                  borderBottom: borderStyle,
+                                  textAlign: 'right',
+                                  fontWeight: 600,
+                                  fontVariantNumeric: 'tabular-nums',
+                                }}
+                              >
+                                {typeof item.points === 'number'
+                                  ? item.points
+                                  : '—'}
+                              </td>
+                            </tr>
+                          )
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              ))}
+            </div>
           )}
         </div>
       )}
