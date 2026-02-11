@@ -92,6 +92,10 @@ export default function HomePage({
         predictions,
       })
       setSuccess('Palpites enviados com sucesso!')
+      // Zera inputs após sucesso
+      setName('')
+      setSubmissionToken('')
+      setScores({})
     } catch (err) {
       setSubmitError(
         err instanceof Error ? err.message : 'Erro ao enviar palpites',

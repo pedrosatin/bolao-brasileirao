@@ -41,6 +41,7 @@ export default function MatchCard({
           onChange={(event) =>
             onChange(match.id, Number(event.target.value), value.away)
           }
+          onFocus={(event) => event.target.select()}
           style={{
             width: '64px',
             padding: '8px',
@@ -57,6 +58,7 @@ export default function MatchCard({
           onChange={(event) =>
             onChange(match.id, value.home, Number(event.target.value))
           }
+          onFocus={(event) => event.target.select()}
           style={{
             width: '64px',
             padding: '8px',
