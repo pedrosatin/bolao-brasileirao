@@ -14,3 +14,11 @@ binding = "DB"
 database_name = "bolao-brasileirao"
 database_id = "28b1c613-f137-4b15-afa9-ff3250025127"
 migrations_dir = "migrations"
+
+[env.production]
+vars = { ENVIRONMENT = "production" }
+
+[[env.production.routes]]
+pattern = "*/admin/*"
+zone_name = "bolao-brasileirao.pages.dev"
+custom_domain = true
