@@ -5,9 +5,9 @@ type AlertProps = {
 
 export default function Alert({ type, message }: AlertProps) {
   const styles: Record<AlertProps['type'], string> = {
-    success: '#16a34a',
-    error: '#dc2626',
-    info: '#2563eb',
+    success: 'var(--color-accent-success)',
+    error: 'var(--color-accent-error)',
+    info: 'var(--color-accent-info)',
   }
 
   return (
@@ -15,7 +15,7 @@ export default function Alert({ type, message }: AlertProps) {
       style={{
         borderRadius: '12px',
         padding: '12px 16px',
-        background: '#f1f5f9',
+        background: 'var(--color-bg-muted)',
         color: styles[type],
         fontWeight: 600,
         marginBottom: '16px',

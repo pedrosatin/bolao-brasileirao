@@ -29,8 +29,8 @@ export default function Tabs({ activeTab }: TabsProps) {
             style={{
               padding: '10px 16px',
               borderRadius: '999px',
-              background: isActive ? '#2563eb' : '#e2e8f0',
-              color: isActive ? '#fff' : '#0f172a',
+              background: isActive ? 'var(--color-accent-blue)' : 'var(--color-bg-hover)',
+              color: isActive ? '#fff' : 'var(--color-text-primary)',
               fontWeight: 600,
               textDecoration: 'none',
               cursor: 'pointer',

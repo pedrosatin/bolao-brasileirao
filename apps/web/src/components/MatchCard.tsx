@@ -17,17 +17,17 @@ export default function MatchCard({
   return (
     <div
       style={{
-        background: '#ffffff',
+        background: 'var(--color-bg-surface)',
         borderRadius: '16px',
         padding: '16px',
-        boxShadow: '0 6px 16px rgba(15, 23, 42, 0.08)',
+        boxShadow: '0 6px 16px var(--color-shadow)',
         display: 'grid',
         gap: '12px',
       }}
     >
       <div>
         <strong>{match.homeTeam}</strong> x <strong>{match.awayTeam}</strong>
-        <div style={{ fontSize: '0.85rem', color: '#64748b' }}>
+        <div style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>
           {formatDate(match.utcDate)}
         </div>
       </div>
@@ -46,7 +46,9 @@ export default function MatchCard({
             width: '64px',
             padding: '8px',
             borderRadius: '8px',
-            border: '1px solid #cbd5f5',
+            border: '1px solid var(--color-border-default)',
+            background: 'var(--color-bg-surface)',
+            color: 'var(--color-text-primary)',
           }}
         />
         <span style={{ fontWeight: 600 }}>x</span>
@@ -63,13 +65,15 @@ export default function MatchCard({
             width: '64px',
             padding: '8px',
             borderRadius: '8px',
-            border: '1px solid #cbd5f5',
+            border: '1px solid var(--color-border-default)',
+            background: 'var(--color-bg-surface)',
+            color: 'var(--color-text-primary)',
           }}
         />
       </div>
 
       {disabled && (
-        <div style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
+        <div style={{ fontSize: '0.8rem', color: 'var(--color-text-light)' }}>
           Palpite bloqueado (jogo já começou)
         </div>
       )}

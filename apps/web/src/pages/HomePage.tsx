@@ -193,7 +193,9 @@ export default function HomePage({
           style={{
             padding: '10px',
             borderRadius: '8px',
-            border: '1px solid #cbd5f5',
+            border: '1px solid var(--color-border-default)',
+            background: 'var(--color-bg-surface)',
+            color: 'var(--color-text-primary)',
           }}
         />
       </label>
@@ -207,7 +209,9 @@ export default function HomePage({
           style={{
             padding: '10px',
             borderRadius: '8px',
-            border: '1px solid #cbd5f5',
+            border: '1px solid var(--color-border-default)',
+            background: 'var(--color-bg-surface)',
+            color: 'var(--color-text-primary)',
           }}
         />
       </label>
@@ -240,7 +244,7 @@ export default function HomePage({
         style={{
           padding: '14px',
           borderRadius: '12px',
-          background: canSubmit ? '#2563eb' : '#94a3b8',
+          background: canSubmit ? 'var(--color-accent-blue)' : 'var(--color-text-light)',
           color: '#fff',
           fontWeight: 600,
         }}

@@ -144,7 +144,9 @@ export default function AdminPage() {
           style={{
             padding: '10px',
             borderRadius: '8px',
-            border: '1px solid #cbd5f5',
+            border: '1px solid var(--color-border-default)',
+            background: 'var(--color-bg-surface)',
+            color: 'var(--color-text-primary)',
           }}
         />
       </label>
@@ -158,7 +160,9 @@ export default function AdminPage() {
           style={{
             padding: '10px',
             borderRadius: '8px',
-            border: '1px solid #cbd5f5',
+            border: '1px solid var(--color-border-default)',
+            background: 'var(--color-bg-surface)',
+            color: 'var(--color-text-primary)',
           }}
         />
       </label>
@@ -170,7 +174,7 @@ export default function AdminPage() {
           style={{
             padding: '12px 16px',
             borderRadius: '12px',
-            background: canRun ? '#2563eb' : '#94a3b8',
+            background: canRun ? 'var(--color-accent-blue)' : 'var(--color-text-light)',
             color: '#fff',
             fontWeight: 600,
           }}
@@ -183,8 +187,8 @@ export default function AdminPage() {
           style={{
             padding: '12px 16px',
             borderRadius: '12px',
-            background: '#0f172a',
-            color: '#fff',
+            background: 'var(--color-text-primary)',
+            color: 'var(--color-bg-primary)',
             fontWeight: 600,
           }}
         >
@@ -203,8 +207,10 @@ export default function AdminPage() {
             style={{
               padding: '10px',
               borderRadius: '8px',
-              border: '1px solid #cbd5f5',
+              border: '1px solid var(--color-border-default)',
               fontFamily: 'monospace',
+              background: 'var(--color-bg-surface)',
+              color: 'var(--color-text-primary)',
             }}
           />
           {expiresAt && (
@@ -221,12 +227,12 @@ export default function AdminPage() {
           gap: '12px',
           padding: '16px',
           borderRadius: '12px',
-          border: '1px solid #e2e8f0',
-          background: '#f8fafc',
+          border: '1px solid var(--color-border-light)',
+          background: 'var(--color-bg-muted)',
         }}
       >
         <div style={{ fontWeight: 600 }}>Sincronizar partidas finalizadas</div>
-        <p style={{ margin: 0, fontSize: '14px', color: '#475569' }}>
+        <p style={{ margin: 0, fontSize: '14px', color: 'var(--color-text-secondary)' }}>
           Busca os resultados confirmados na Football-Data e atualiza as
           partidas da rodada atual antes do recálculo.
         </p>
@@ -236,7 +242,7 @@ export default function AdminPage() {
           style={{
             padding: '12px 16px',
             borderRadius: '12px',
-            background: canSync ? '#0ea5e9' : '#94a3b8',
+            background: canSync ? 'var(--color-accent-cyan)' : 'var(--color-text-light)',
             color: '#fff',
             fontWeight: 600,
           }}
@@ -251,12 +257,12 @@ export default function AdminPage() {
           gap: '12px',
           padding: '16px',
           borderRadius: '12px',
-          border: '1px solid #e2e8f0',
-          background: '#f8fafc',
+          border: '1px solid var(--color-border-light)',
+          background: 'var(--color-bg-muted)',
         }}
       >
         <div style={{ fontWeight: 600 }}>Reprocessar pontuação da rodada</div>
-        <p style={{ margin: 0, fontSize: '14px', color: '#475569' }}>
+        <p style={{ margin: 0, fontSize: '14px', color: 'var(--color-text-secondary)' }}>
           Força a leitura dos resultados gravados na rodada e recalcula os
           pontos de todos os participantes.
         </p>
@@ -266,7 +272,7 @@ export default function AdminPage() {
           style={{
             padding: '12px 16px',
             borderRadius: '12px',
-            background: canRun ? '#15803d' : '#94a3b8',
+            background: canRun ? 'var(--color-accent-green)' : 'var(--color-text-light)',
             color: '#fff',
             fontWeight: 600,
           }}
@@ -286,7 +292,9 @@ export default function AdminPage() {
           style={{
             padding: '10px',
             borderRadius: '8px',
-            border: '1px solid #cbd5f5',
+            border: '1px solid var(--color-border-default)',
+            background: 'var(--color-bg-surface)',
+            color: 'var(--color-text-primary)',
           }}
         />
       </label>
@@ -297,7 +305,7 @@ export default function AdminPage() {
         style={{
           padding: '12px 16px',
           borderRadius: '12px',
-          background: canRun ? '#dc2626' : '#94a3b8',
+          background: canRun ? 'var(--color-accent-error)' : 'var(--color-text-light)',
           color: '#fff',
           fontWeight: 600,
         }}

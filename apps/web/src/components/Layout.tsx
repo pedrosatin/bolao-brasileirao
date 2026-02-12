@@ -14,7 +14,7 @@ export default function Layout({ children }: { children: ReactNode }) {
         <h1 style={{ margin: 0 }}>Bolão Brasileirão</h1>
       </header>
       <main style={{ flexGrow: 1 }}>{children}</main>
-      <footer style={{ marginTop: '32px', fontSize: '14px', color: '#4b5563' }}>
+      <footer style={{ marginTop: '32px', fontSize: '14px', color: 'var(--color-text-secondary)' }}>
         Criado por{' '}
         <a
           href="https://github.com/pedrosatin"
