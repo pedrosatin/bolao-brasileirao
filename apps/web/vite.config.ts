@@ -12,6 +12,7 @@ export default defineConfig({
         main: new URL('./index.html', import.meta.url).pathname,
         rankings: new URL('./rankings.html', import.meta.url).pathname,
         history: new URL('./history.html', import.meta.url).pathname,
+        admin: new URL('./admin.html', import.meta.url).pathname,
       }
     }
   }
