@@ -113,7 +113,9 @@ export default function HistoryPage() {
           style={{
             padding: '10px',
             borderRadius: '8px',
-            border: '1px solid #cbd5f5',
+            border: '1px solid var(--color-border-default)',
+            background: 'var(--color-bg-surface)',
+            color: 'var(--color-text-primary)',
           }}
         >
           {history.map((round) => (
@@ -159,10 +161,10 @@ export default function HistoryPage() {
                 <div
                   key={participant}
                   style={{
-                    background: '#ffffff',
+                    background: 'var(--color-bg-surface)',
                     padding: '16px',
                     borderRadius: '16px',
-                    boxShadow: '0 2px 6px rgba(15, 23, 42, 0.08)',
+                    boxShadow: '0 2px 6px var(--color-shadow)',
                     flex: '1 1 320px',
                     maxWidth: '600px',
                     width: '100%',
@@ -178,7 +180,7 @@ export default function HistoryPage() {
                     }}
                   >
                     <strong style={{ fontSize: '1rem' }}>{participant}</strong>
-                    <span style={{ color: '#64748b', fontSize: '0.85rem' }}>
+                    <span style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem' }}>
                       {items.length} {items.length === 1 ? 'jogo' : 'jogos'}
                     </span>
                   </div>
@@ -190,7 +192,7 @@ export default function HistoryPage() {
                         <tr
                           style={{
                             textAlign: 'left',
-                            color: '#475569',
+                            color: 'var(--color-text-secondary)',
                             fontSize: '0.8rem',
                             textTransform: 'uppercase',
                             letterSpacing: '0.04em',
@@ -199,7 +201,7 @@ export default function HistoryPage() {
                           <th
                             style={{
                               paddingBottom: '8px',
-                              borderBottom: '1px solid #e2e8f0',
+                              borderBottom: '1px solid var(--color-border-light)',
                               width: '45%',
                             }}
                           >
@@ -208,7 +210,7 @@ export default function HistoryPage() {
                           <th
                             style={{
                               paddingBottom: '8px',
-                              borderBottom: '1px solid #e2e8f0',
+                              borderBottom: '1px solid var(--color-border-light)',
                               width: '20%',
                             }}
                           >
@@ -217,7 +219,7 @@ export default function HistoryPage() {
                           <th
                             style={{
                               paddingBottom: '8px',
-                              borderBottom: '1px solid #e2e8f0',
+                              borderBottom: '1px solid var(--color-border-light)',
                               width: '15%',
                             }}
                           >
@@ -226,7 +228,7 @@ export default function HistoryPage() {
                           <th
                             style={{
                               paddingBottom: '8px',
-                              borderBottom: '1px solid #e2e8f0',
+                              borderBottom: '1px solid var(--color-border-light)',
                               width: '20%',
                               textAlign: 'right',
                             }}
@@ -240,7 +242,7 @@ export default function HistoryPage() {
                           const borderStyle =
                             index === items.length - 1
                               ? 'none'
-                              : '1px solid #f1f5f9'
+                              : '1px solid var(--color-border-muted)'
 
                           return (
                             <tr key={`${participant}-${item.matchId}`}>
@@ -257,7 +259,7 @@ export default function HistoryPage() {
                                 style={{
                                   padding: '10px 0',
                                   borderBottom: borderStyle,
-                                  color: '#0f172a',
+                                  color: 'var(--color-text-primary)',
                                   fontVariantNumeric: 'tabular-nums',
                                 }}
                               >
@@ -267,7 +269,7 @@ export default function HistoryPage() {
                                 style={{
                                   padding: '10px 0',
                                   borderBottom: borderStyle,
-                                  color: '#0f172a',
+                                  color: 'var(--color-text-primary)',
                                   fontVariantNumeric: 'tabular-nums',
                                 }}
                               >

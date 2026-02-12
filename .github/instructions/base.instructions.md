@@ -270,6 +270,7 @@ Frontend (React) ←→ Cloudflare Worker ←→ D1 Database
 - **Vite 5.4** for bundling
 - **Fetch API** for HTTP requests
 - **No external UI framework**: inline styles + CSS utilities
+- **Theming**: CSS variables with `prefers-color-scheme` and critical inline CSS in HTML entry files to avoid light-mode flash
 
 ### Backend
 
