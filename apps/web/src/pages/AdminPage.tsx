@@ -132,17 +132,6 @@ export default function AdminPage() {
 
   return (
     <div style={{ display: 'grid', gap: '16px' }}>
-      <div
-        style={{
-          background: '#e0f2fe',
-          padding: '12px 16px',
-          borderRadius: '12px',
-        }}
-      >
-        <strong>Admin</strong> • endpoints protegidos por{' '}
-        <code>X-Admin-Token</code>
-      </div>
-
       {error && <Alert type="error" message={error} />}
       {success && <Alert type="success" message={success} />}
 

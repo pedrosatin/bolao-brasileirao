@@ -170,17 +170,6 @@ export default function HomePage({
 
   return (
     <div style={{ display: 'grid', gap: '16px' }}>
-      <div
-        style={{
-          background: '#e0f2fe',
-          padding: '12px 16px',
-          borderRadius: '12px',
-        }}
-      >
-        <strong>Rodada {round.roundNumber}</strong> • Envio até{' '}
-        {new Date(round.cutoffAt).toLocaleString('pt-BR')}
-      </div>
-
       {lockedCount > 0 && (
         <Alert
           type="info"
