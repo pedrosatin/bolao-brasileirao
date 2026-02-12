@@ -268,7 +268,7 @@ export async function recalculateRoundScores(
     return originError;
   }
 
-  const authError = requireAdmin(request, env);
+  const authError = await requireAdmin(request, env);
   if (authError) {
     return authError;
   }
@@ -492,7 +492,7 @@ function requireOriginAllowed(request: Request, env: Env): Response | null {
 
 function parseAllowedOrigins(value?: string): string[] {
   if (!value) {
-    return ["*"];
+    return [];
   }
 
   const origins = value
@@ -500,10 +500,10 @@ function parseAllowedOrigins(value?: string): string[] {
     .map((s) => s.trim())
     .filter(Boolean);
 
-  return origins.length > 0 ? origins : ["*"];
+  return origins.length > 0 ? origins : [];
 }
 
-function requireAdmin(request: Request, env: Env): Response | null {
+async function requireAdmin(request: Request, env: Env): Promise<Response | null> {
   const expected = (env.ADMIN_TOKEN ?? "").trim();
   if (!expected) {
     console.error("ADMIN_TOKEN is not configured");
@@ -511,7 +511,14 @@ function requireAdmin(request: Request, env: Env): Response | null {
   }
 
   const provided = (request.headers.get("X-Admin-Token") ?? "").trim();
-  if (!provided || provided !== expected) {
+  if (!provided) {
+    return errorResponse("Invalid request", 401);
+  }
+
+  // Timing-safe comparison via constant-time SHA-256 hash comparison
+  const expectedHash = await sha256Hex(expected);
+  const providedHash = await sha256Hex(provided);
+  if (expectedHash !== providedHash) {
     return errorResponse("Invalid request", 401);
   }
 
@@ -551,7 +558,7 @@ export async function generateSubmissionToken(
     return originError;
   }
 
-  const authError = requireAdmin(request, env);
+  const authError = await requireAdmin(request, env);
   if (authError) {
     return authError;
   }
@@ -609,7 +616,7 @@ export async function adminDeletePredictionsByName(
     return originError;
   }
 
-  const authError = requireAdmin(request, env);
+  const authError = await requireAdmin(request, env);
   if (authError) {
     return authError;
   }
@@ -643,7 +650,7 @@ export async function adminSyncFinishedMatches(
     return originError;
   }
 
-  const authError = requireAdmin(request, env);
+  const authError = await requireAdmin(request, env);
   if (authError) {
     return authError;
   }

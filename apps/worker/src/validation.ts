@@ -23,7 +23,7 @@ export function parsePredictionsPayload(body: unknown): PredictionsPayload | nul
   const submissionToken = data.submissionToken;
   const predictions = data.predictions;
 
-  if (typeof participantName !== "string" || participantName.trim().length < 2) {
+  if (typeof participantName !== "string" || participantName.trim().length < 2 || participantName.trim().length > 50) {
     return null;
   }
 
@@ -43,7 +43,10 @@ export function parsePredictionsPayload(body: unknown): PredictionsPayload | nul
     if (typeof entry.home !== "number" || typeof entry.away !== "number") {
       return null;
     }
-    if (entry.home < 0 || entry.away < 0) {
+    if (entry.home < 0 || entry.away < 0 || entry.home > 99 || entry.away > 99) {
+      return null;
+    }
+    if (!Number.isInteger(entry.home) || !Number.isInteger(entry.away)) {
       return null;
     }
     parsedPredictions.push({

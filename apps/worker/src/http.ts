@@ -4,7 +4,7 @@ type CorsEnv = {
 
 function parseAllowedOrigins(value?: string): string[] {
   if (!value) {
-    return ["*"];
+    return [];
   }
 
   const origins = value
@@ -12,7 +12,7 @@ function parseAllowedOrigins(value?: string): string[] {
     .map((s) => s.trim())
     .filter(Boolean);
 
-  return origins.length > 0 ? origins : ["*"];
+  return origins.length > 0 ? origins : [];
 }
 
 function resolveCorsOrigin(requestOrigin: string | null, env: CorsEnv): string | null {
