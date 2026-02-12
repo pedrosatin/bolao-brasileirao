@@ -111,6 +111,8 @@ Ranking geral.
 
 ## Erros comuns
 
-- `400`: payload inválido
+- `400`: payload inválido (nome curto/longo, scores fora de 0-99, scores não inteiros)
+- `401`: submission token ausente ou expirado / admin token ausente
+- `403`: submission token inválido / origin não permitida / token não configurado para a rodada
 - `409`: nome já usado na rodada
 - `423`: jogo já começou / status não permite palpite

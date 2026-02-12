@@ -18,11 +18,24 @@ This ensures future AI assistance has accurate, up-to-date context.
 4. Add entry to `docs/DECISIONS_LOG.md` if architectural decision
 5. Commit with clear message
 
+### MANDATORY — Self-Check Before Finishing
+
+After ANY code change, the LLM MUST ask itself:
+
+1. Did I change an endpoint, payload, or response? → Update `docs/API.md` + API section here
+2. Did I change env vars, secrets, or deploy config? → Update `docs/DEPLOY.md` + Environment Variables section here
+3. Did I add/change validation rules? → Update `docs/BACKEND.md` + relevant section here
+4. Did I change security behavior (CORS, auth, tokens)? → Update `docs/ARCHITECTURE.md` + Security section here
+5. Did I make an architectural decision? → Add entry to `docs/DECISIONS_LOG.md` + Decision Log section here
+6. Did I add/remove a file or component? → Update Project Structure section here
+
+If ANY answer is yes, update the docs **in the same commit**. Do NOT leave documentation updates for a follow-up.
+
 ### When to Document
 
-✅ **New endpoint** | ✅ **Schema change** | ✅ **Architecture decision** | ✅ **New component** | ✅ **Scoring rule change**
+✅ **New endpoint** | ✅ **Schema change** | ✅ **Architecture decision** | ✅ **New component** | ✅ **Scoring rule change** | ✅ **Security change** | ✅ **Env var change** | ✅ **Validation rule change** | ✅ **Deploy config change**
 
-❌ **Typo fix** | ❌ **Internal refactor** | ❌ **Comment update** | ❌ **Patch dependency**
+❌ **Typo fix** | ❌ **Internal refactor (no behavior change)** | ❌ **Comment update** | ❌ **Patch dependency**
 
 ### Reference Documentation First
 
@@ -222,9 +235,16 @@ Frontend (React) ←→ Cloudflare Worker ←→ D1 Database
 
 ### Token Validation
 
-- In **production**: Submission token required and validated via SHA-256 hash
-- In **development** (`ENVIRONMENT=development`): Token can be empty
-- Frontend detects `import.meta.env.DEV` to skip token requirement locally
+- In **production** (`ENVIRONMENT=production`): Submission token is **always required** and validated via SHA-256 hash against the stored token for the round
+- In **development** (`ENVIRONMENT=development`): Token can be empty (bypass), but if any token is provided it is **always validated** against the database
+- The `ENVIRONMENT` variable defaults to `production` in `wrangler.toml` and is also explicitly set via `--var` in the deploy workflow
+- Frontend detects `import.meta.env.DEV` to skip token input requirement locally
+
+### Admin Token Validation
+
+- Admin endpoints require `X-Admin-Token` header
+- Compared using **timing-safe SHA-256 hash comparison** (not direct string equality) to prevent timing attacks
+- `ADMIN_TOKEN` is stored as a Cloudflare Worker secret (not in `wrangler.toml`)
 
 ### Match Synchronization
 
@@ -280,9 +300,9 @@ Frontend (React) ←→ Cloudflare Worker ←→ D1 Database
 - `FOOTBALL_DATA_BASE_URL` (default: `https://api.football-data.org/v4`)
 - `FOOTBALL_DATA_COMPETITION_ID` (default: `2013`)
 - `DEFAULT_EXTERNAL_LINK` (default: G1 Globo link)
-- `CORS_ORIGINS` (default: localhost + Pages domain)
-- `ADMIN_TOKEN` (optional): For admin endpoints
-- `ENVIRONMENT` (default: `production`; set to `development` locally)
+- `CORS_ORIGINS` (default: `http://localhost:5173` in wrangler.toml; production value injected via GitHub Actions variable `CORS_ORIGINS`; **if unset, CORS denies all origins** — no wildcard fallback)
+- `ADMIN_TOKEN` (required for admin endpoints): Stored as Worker secret, synced via GitHub Actions secret `WORKER_ADMIN_TOKEN`
+- `ENVIRONMENT` (default: `production` in wrangler.toml; explicitly set to `production` via `--var` in deploy workflow; set to `development` only for local dev via `.dev.vars` or wrangler override)
 
 ---
 
@@ -343,6 +363,9 @@ wrangler deploy
 - **Database layer**: Use `/db.ts` for all queries; abstract SQL behind functions
 - **Handlers**: Request logic in `/handlers.ts`; keep endpoints thin
 - **Validation**: Strict payload validation in `/validation.ts`
+  - `participantName`: min 2, max 50 characters
+  - `pred_home_score` / `pred_away_score`: integers, 0–99
+  - All inputs validated before database operations
 - **Responses**: Consistent JSON format with proper HTTP status codes
 - **Async/await**: Prefer over `.then()` chains
 
@@ -447,5 +470,5 @@ For detailed information, consult:
 
 ---
 
-_Last updated: 2026-02-11_
+_Last updated: 2026-02-12_
 _For questions, refer to project docs or existing code patterns._

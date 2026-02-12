@@ -22,14 +22,16 @@ Configure em **Settings → Secrets and variables → Actions**:
 - `CLOUDFLARE_PAGES_PROJECT` (nome do projeto no Pages)
 - `VITE_API_BASE_URL` (URL pública do Worker, ex.: `https://api.seudominio.com`)
 - `CLOUDFLARE_D1_DATABASE_ID` (id do D1 usado no binding `DB`)
+- `CORS_ORIGINS` (origins permitidas para CORS em produção, ex.: `https://bolao-brasileirao.pages.dev`)
 
 ## Backend (Worker)
 
 Workflow: `.github/workflows/deploy-worker.yml`
 
 - Deploy automático em push para `main` quando arquivos de `apps/worker/**` mudam.
-- Variáveis padrão são definidas no comando do workflow.
+- Variáveis padrão são definidas no comando do workflow, incluindo `ENVIRONMENT=production` e `CORS_ORIGINS` (via GitHub variable).
 - Se `WORKER_ADMIN_TOKEN` estiver definido, o workflow sincroniza o secret `ADMIN_TOKEN` no Worker.
+- **IMPORTANTE**: O `wrangler.toml` usa `ENVIRONMENT=production` por padrão. Para desenvolvimento local, use `.dev.vars` ou passe `ENVIRONMENT=development` manualmente.
 
 ## Frontend (Pages)
 

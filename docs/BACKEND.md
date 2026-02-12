@@ -30,9 +30,13 @@ Fornecer API REST para jogos, palpites, ranking e histórico de rodadas usando D
 ## Regras
 
 - Palpites bloqueados por jogo: o Worker rejeita envios com status diferente de `SCHEDULED/TIMED` ou cujo `utc_date` já passou considerando Brasília (UTC-3). `cutoff_at` permanece para expiração/geração de token e exibição.
-- Nomes únicos por rodada.
+- Nomes únicos por rodada (min 2, max 50 caracteres).
+- Placares preditos devem ser inteiros entre 0 e 99.
 - Pontuação centralizada em `scoring.ts`.
 - Cache de jogos: 6 dias via `rounds.last_sync_at`.
+- `ENVIRONMENT` padrão é `production`; submission token é obrigatório. Bypass só em `development` com token vazio.
+- CORS: sem `CORS_ORIGINS` configurado, todas as origins são negadas (sem fallback para `*`).
+- Admin token comparado via SHA-256 hash (timing-safe).
 
 ## Endpoints
 

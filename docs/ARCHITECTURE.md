@@ -34,8 +34,12 @@ A solução é composta por um frontend React hospedado no Cloudflare Pages e um
 
 ## Segurança e confiabilidade
 
-- Rate limit simples por IP no Worker.
-- Validação estrita de payloads.
+- CORS restritivo: origins permitidas configuradas via `CORS_ORIGINS`; se não configurado, nega todas as origins (sem fallback para `*`).
+- Admin endpoints protegidos por `X-Admin-Token` com comparação timing-safe (via SHA-256 hash).
+- Submission tokens hasheados com SHA-256 e validados contra o banco.
+- Validação estrita de payloads: nome max 50 chars, scores inteiros 0-99.
+- `ENVIRONMENT` padrão é `production`; bypass de token só em `development` e apenas quando token é completamente vazio.
+- Rate limiting recomendado via Cloudflare WAF (Security → Rate limiting rules), não no código.
 - Evitar excesso de chamadas à API externa com cache de resultados em D1.
 
 ## Estrutura sugerida do repositório
