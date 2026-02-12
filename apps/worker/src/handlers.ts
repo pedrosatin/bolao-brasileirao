@@ -507,12 +507,12 @@ function requireAdmin(request: Request, env: Env): Response | null {
   const expected = (env.ADMIN_TOKEN ?? "").trim();
   if (!expected) {
     console.error("ADMIN_TOKEN is not configured");
-    return errorResponse("Admin not configured", 500);
+    return errorResponse("Invalid request", 401);
   }
 
   const provided = (request.headers.get("X-Admin-Token") ?? "").trim();
   if (!provided || provided !== expected) {
-    return errorResponse("Unauthorized", 401);
+    return errorResponse("Invalid request", 401);
   }
 
   return null;
