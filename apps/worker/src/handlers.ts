@@ -389,9 +389,10 @@ export async function createPredictions(
     return errorResponse("Round not found", 404);
   }
 
-  if (!submissionToken || submissionToken.trim().length < 10) {
-    // Allow empty token only in development
-    if (env.ENVIRONMENT !== 'development') {
+  const isDev = env.ENVIRONMENT === 'development';
+
+  if (!submissionToken || submissionToken.trim().length === 0) {
+    if (!isDev) {
       return errorResponse("Submission token required", 401);
     }
   } else {

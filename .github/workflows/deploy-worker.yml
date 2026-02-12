@@ -56,4 +56,4 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID || vars.CLOUDFLARE_ACCOUNT_ID }}
           CORS_ORIGINS: ${{ vars.CORS_ORIGINS }}
-        run: npx wrangler deploy --var FOOTBALL_DATA_COMPETITION_ID=2013 --var FOOTBALL_DATA_BASE_URL=https://api.football-data.org/v4 --var DEFAULT_EXTERNAL_LINK=https://g1.globo.com/futebol/brasileirao-serie-a/ --var "CORS_ORIGINS=$CORS_ORIGINS"
+        run: npx wrangler deploy --var ENVIRONMENT=production --var FOOTBALL_DATA_COMPETITION_ID=2013 --var FOOTBALL_DATA_BASE_URL=https://api.football-data.org/v4 --var DEFAULT_EXTERNAL_LINK=https://g1.globo.com/futebol/brasileirao-serie-a/ --var "CORS_ORIGINS=$CORS_ORIGINS"
