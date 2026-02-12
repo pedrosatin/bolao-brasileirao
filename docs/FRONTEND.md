@@ -47,3 +47,9 @@ Interface simples e mobile-first para listar jogos, coletar palpites, exibir ran
 - Validação de nome obrigatório.
 - Inputs bloqueados individualmente quando o horário do jogo em Brasília (UTC-3) já passou ou o status não é mais `SCHEDULED/TIMED`.
 - Feedback visual para sucesso/erro.
+
+## Theming (dark/light)
+
+- Tema baseado em variáveis CSS em `src/styles/global.css`.
+- Alternância automática com `@media (prefers-color-scheme: dark)`.
+- CSS crítico inline nos HTMLs de entrada (`index.html`, `rankings.html`, `history.html`, `admin.html`) para evitar flash de light mode antes do bundle carregar.

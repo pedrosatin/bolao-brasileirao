@@ -4,6 +4,26 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <style>
+      :root {
+        color-scheme: light dark;
+        --color-bg-primary: #f8fafc;
+        --color-text-primary: #0f172a;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --color-bg-primary: #0f172a;
+          --color-text-primary: #f1f5f9;
+        }
+      }
+
+      html,
+      body {
+        background-color: var(--color-bg-primary);
+        color: var(--color-text-primary);
+      }
+    </style>
     <title>Palpites - Bolão Brasileirão</title>
   </head>
   <body>
