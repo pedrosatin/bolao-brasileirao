@@ -45,7 +45,7 @@ Interface simples e mobile-first para listar jogos, coletar palpites, exibir ran
 ## UX
 
 - Validação de nome obrigatório.
-- Inputs bloqueados individualmente quando o horário do jogo em Brasília (UTC-3) já passou ou o status não é mais `SCHEDULED/TIMED`.
+- Inputs bloqueados individualmente quando o horário do jogo (UTC) já passou.
 - Feedback visual para sucesso/erro.
 
 ## Theming (dark/light)

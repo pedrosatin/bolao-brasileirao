@@ -76,7 +76,7 @@ Cria palpites para uma rodada.
 
 **Rules**
 
-- Rejeitar palpites para jogos cujo status não seja `SCHEDULED`/`TIMED` ou cujo `utc_date` já tenha passado (comparação no fuso de Brasília / UTC-3).
+- Rejeitar palpites para jogos cujo `utc_date` já tenha passado (comparação direta em UTC).
 - Rejeitar se já existir palpite do mesmo nome na rodada.
 - Rejeitar se `submissionToken` não for válido/expirado para a rodada.
   - Tokens vencem em `round.cutoff_at`.
@@ -117,4 +117,4 @@ Ranking geral.
 - `401`: submission token ausente ou expirado / admin token ausente
 - `403`: submission token inválido / origin não permitida / token não configurado para a rodada
 - `409`: nome já usado na rodada
-- `423`: jogo já começou / status não permite palpite
+- `423`: jogo já começou (horário UTC passou)

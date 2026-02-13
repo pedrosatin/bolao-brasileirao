@@ -20,7 +20,6 @@ import {
 } from "./db";
 
 const DEFAULT_LINK = "https://g1.globo.com/futebol/brasileirao-serie-a/";
-const SCHEDULABLE_STATUSES = new Set(["SCHEDULED", "TIMED"]);
 
 export async function getNextRound(
   _request: Request,
@@ -454,12 +453,6 @@ export async function createPredictions(
     const match = matchesById.get(prediction.matchId);
     if (!match) {
       return errorResponse("One or more matches are invalid for this round", 400);
-    }
-
-    const status = (match.status ?? "").toUpperCase();
-    const statusLocked = !SCHEDULABLE_STATUSES.has(status);
-    if (statusLocked || hasMatchStartedInBrasilia(match.utc_date, nowUtc)) {
-      return errorResponse("One or more matches already started", 423);
     }
   }
 

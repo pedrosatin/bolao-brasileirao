@@ -98,7 +98,7 @@ Frontend (React) ←→ Cloudflare Worker ←→ D1 Database
 
 - Each **round** has a `cutoff_at` timestamp (Tuesday 17:00 BRT = 20:00 UTC) usado para exibição e expiração de token
 - **Round advancement**: `GET /rounds/next` checks if `cutoff_at` has expired (`now > cutoff_at`). If yes, fetches `currentMatchday + 1` from Football-Data.org, allowing next round to load before the external API updates `currentMatchday`
-- Predictions are locked per match: status must be `SCHEDULED`/`TIMED` and kickoff (Brasília / UTC-3) must still be in the future
+- Predictions are locked per match: kickoff time (UTC) must still be in the future
 - **Matches** linked to rounds store team names, scores, and status (SCHEDULED, IN_PLAY, FINISHED)
 - Match data synced from Football-Data.org with 6-day cache via `rounds.last_sync_at`
 
