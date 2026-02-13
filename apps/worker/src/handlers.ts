@@ -34,37 +34,45 @@ export async function getNextRound(
     const currentMatchday = competition.currentSeason?.currentMatchday;
     const cacheTtlMs = 6 * 24 * 60 * 60 * 1000;
 
+    let effectiveMatchday = currentMatchday;
+
     if (currentMatchday) {
       const seasonYear = resolveSeasonYear(competition.currentSeason?.startDate, []);
       const cachedRound = await getRoundBySeasonNumber(env.DB, seasonYear, currentMatchday);
       if (cachedRound?.last_sync_at) {
         const lastSync = new Date(cachedRound.last_sync_at).getTime();
+        const cutoffExpired = new Date(cachedRound.cutoff_at) <= now;
+
         if (!Number.isNaN(lastSync) && now.getTime() - lastSync < cacheTtlMs) {
           const storedMatches = await getMatchesByRoundId(env.DB, cachedRound.id);
           if (storedMatches.length > 0) {
-            return jsonResponse({
-              round: {
-                id: cachedRound.id,
-                season: cachedRound.season,
-                roundNumber: cachedRound.round_number,
-                cutoffAt: cachedRound.cutoff_at
-              },
-              matches: storedMatches.map((match) => ({
-                id: match.id,
-                utcDate: match.utc_date,
-                status: match.status,
-                homeTeam: match.home_team,
-                awayTeam: match.away_team,
-                externalLink: match.external_link
-              }))
-            });
+            if (cutoffExpired) {
+              effectiveMatchday = currentMatchday + 1;
+            } else {
+              return jsonResponse({
+                round: {
+                  id: cachedRound.id,
+                  season: cachedRound.season,
+                  roundNumber: cachedRound.round_number,
+                  cutoffAt: cachedRound.cutoff_at
+                },
+                matches: storedMatches.map((match) => ({
+                  id: match.id,
+                  utcDate: match.utc_date,
+                  status: match.status,
+                  homeTeam: match.home_team,
+                  awayTeam: match.away_team,
+                  externalLink: match.external_link
+                }))
+              });
+            }
           }
         }
       }
     }
 
-    const apiData = currentMatchday
-      ? await fetchMatchesByMatchday(env, currentMatchday)
+    const apiData = effectiveMatchday
+      ? await fetchMatchesByMatchday(env, effectiveMatchday)
       : await fetchScheduledMatches(env);
 
     const apiMatches = apiData.matches;
@@ -73,15 +81,15 @@ export async function getNextRound(
     }
 
     const futureMatches = apiMatches.filter((match) => new Date(match.utcDate) >= now);
-    if (!currentMatchday && futureMatches.length === 0) {
+    if (!effectiveMatchday && futureMatches.length === 0) {
       return errorResponse("No upcoming matches found", 404);
     }
-    const matchdayNumber = currentMatchday
-      ? currentMatchday
+    const matchdayNumber = effectiveMatchday
+      ? effectiveMatchday
       : Math.min(
         ...futureMatches.map((match) => (match.matchday === null ? Infinity : match.matchday))
       );
-    const matchdayMatches = currentMatchday
+    const matchdayMatches = effectiveMatchday
       ? apiMatches
       : futureMatches.filter((match) => match.matchday === matchdayNumber);
     const seasonYear = resolveSeasonYear(competition.currentSeason?.startDate, matchdayMatches);

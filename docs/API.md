@@ -18,6 +18,8 @@ Healthcheck simples.
 
 Retorna a próxima rodada com partidas.
 
+**Comportamento**: Se a rodada atual já passou do `cutoff_at` (data/hora expirada), o endpoint automaticamente busca `currentMatchday + 1` da Football-Data.org, permitindo carregar a próxima rodada sem esperar que a API externa atualize o `currentMatchday`.
+
 **Response (200)**
 
 ```json

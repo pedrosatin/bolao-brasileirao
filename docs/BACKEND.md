@@ -30,6 +30,7 @@ Fornecer API REST para jogos, palpites, ranking e histórico de rodadas usando D
 ## Regras
 
 - Palpites bloqueados por jogo: o Worker rejeita envios com status diferente de `SCHEDULED/TIMED` ou cujo `utc_date` já passou considerando Brasília (UTC-3). `cutoff_at` permanece para expiração/geração de token e exibição.
+- **Avanço de rodada**: `GET /rounds/next` verifica se `cutoff_at` da rodada atual expirou (`now > cutoff_at`). Se sim, busca `currentMatchday + 1` da Football-Data. Isso permite carregar a próxima rodada antes que a API externa atualize o `currentMatchday`.
 - Nomes únicos por rodada (min 2, max 50 caracteres).
 - Placares preditos devem ser inteiros entre 0 e 99.
 - Pontuação centralizada em `scoring.ts`.
