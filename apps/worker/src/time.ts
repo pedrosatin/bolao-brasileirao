@@ -42,5 +42,6 @@ export function hasMatchStartedInBrasilia(utcDate: string, referenceDate: Date =
     return true;
   }
 
-  return toBrasiliaTime(referenceDate).getTime() >= toBrasiliaTime(matchDate).getTime();
+  // Both dates are in UTC; compare directly
+  return referenceDate.getTime() >= matchDate.getTime();
 }

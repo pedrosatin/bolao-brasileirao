@@ -23,5 +23,6 @@ export function hasMatchStarted(utcDate: string, referenceDate?: Date): boolean 
   }
 
   const now = referenceDate ?? new Date();
-  return toBrasiliaTimestamp(now) >= toBrasiliaTimestamp(matchDate);
+  // Both dates are in UTC; compare directly
+  return now.getTime() >= matchDate.getTime();
 }
