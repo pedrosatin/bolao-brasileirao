@@ -170,7 +170,7 @@ export default function HomePage({
 
   return (
     <div style={{ display: 'grid', gap: '16px' }}>
-      {lockedCount > 0 && (
+      {lockedCount > 0 && hasOpenMatches && (
         <Alert
           type="info"
           message={`${lockedCount} ${lockedLabel} já ${lockedVerb}. Palpites válidos apenas para os demais.`}
@@ -244,7 +244,9 @@ export default function HomePage({
         style={{
           padding: '14px',
           borderRadius: '12px',
-          background: canSubmit ? 'var(--color-accent-blue)' : 'var(--color-text-light)',
+          background: canSubmit
+            ? 'var(--color-accent-blue)'
+            : 'var(--color-text-light)',
           color: '#fff',
           fontWeight: 600,
         }}
