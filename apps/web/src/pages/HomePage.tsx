@@ -7,14 +7,7 @@ import MatchCard from '../components/MatchCard'
 
 const initialScore = { home: 0, away: 0 }
 
-const SCHEDULABLE_STATUSES = new Set(['SCHEDULED', 'TIMED'])
-
 function isMatchLocked(match: Match, referenceDate: Date): boolean {
-  const status = (match.status ?? '').toUpperCase()
-  if (!status || !SCHEDULABLE_STATUSES.has(status)) {
-    return true
-  }
-
   return hasMatchStarted(match.utcDate, referenceDate)
 }
 
