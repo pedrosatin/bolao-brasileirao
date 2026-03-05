@@ -22,7 +22,7 @@ Configure em **Settings → Secrets and variables → Actions**:
 - `CLOUDFLARE_PAGES_PROJECT` (nome do projeto no Pages)
 - `VITE_API_BASE_URL` (URL pública do Worker, ex.: `https://api.seudominio.com`)
 - `CLOUDFLARE_D1_DATABASE_ID` (id do D1 usado no binding `DB`)
-- `CORS_ORIGINS` (origins permitidas para CORS em produção, ex.: `https://bolao-brasileirao.pages.dev`)
+- `CORS_ORIGINS` (origins permitidas para CORS em produção, ex.: `https://bolao-brasileirao.pages.dev,https://bolao.pedrosatin.com`)
 
 ## Backend (Worker)
 
