@@ -285,16 +285,39 @@ export async function recalculateRoundScores(
     return errorResponse("Invalid round id", 400);
   }
 
+  const round = await env.DB
+    .prepare("SELECT round_number FROM rounds WHERE id = ?")
+    .bind(roundId)
+    .first<{ round_number: number }>();
+
+  if (!round) {
+    return errorResponse("Round not found", 404);
+  }
+
+  const nowIso = new Date().toISOString();
+
+  const apiData = await fetchMatchesByMatchday(env, round.round_number);
+  for (const apiMatch of apiData.matches) {
+    if (apiMatch.status !== "FINISHED") continue;
+    const homeScore = apiMatch.score.fullTime.home;
+    const awayScore = apiMatch.score.fullTime.away;
+    if (homeScore === null || awayScore === null) continue;
+
+    await env.DB
+      .prepare(
+        "UPDATE matches SET status = 'FINISHED', home_score = ?, away_score = ?, updated_at = ? " +
+        "WHERE api_match_id = ? AND round_id = ?"
+      )
+      .bind(homeScore, awayScore, nowIso, apiMatch.id, roundId)
+      .run();
+  }
+
   const matches = await env.DB
     .prepare(
       "SELECT id, home_score, away_score FROM matches WHERE round_id = ? ORDER BY utc_date ASC"
     )
     .bind(roundId)
     .all<{ id: number; home_score: number | null; away_score: number | null }>();
-
-  if ((matches.results ?? []).length === 0) {
-    return errorResponse("Round not found", 404);
-  }
 
   const finishedMatches = (matches.results ?? []).filter(
     (match) => match.home_score !== null && match.away_score !== null
@@ -303,8 +326,6 @@ export async function recalculateRoundScores(
   if (finishedMatches.length === 0) {
     return errorResponse("No finished matches to recalculate", 400);
   }
-
-  const nowIso = new Date().toISOString();
 
   for (const match of finishedMatches) {
     await env.DB
