@@ -27,3 +27,10 @@ custom_domain = true
 pattern = "*/admin/*"
 zone_name = "pedrosatin.com"
 custom_domain = true
+
+[observability]
+[observability.logs]
+enabled = true
+invocation_logs = true
+
+[observability.traces]
