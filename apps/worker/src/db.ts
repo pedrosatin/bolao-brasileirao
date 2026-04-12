@@ -25,6 +25,16 @@ export type SubmissionTokenRow = {
   expires_at: string;
 };
 
+export async function getLatestRound(db: D1Database): Promise<RoundRow | null> {
+  const result = await db
+    .prepare(
+      "SELECT id, season, round_number, cutoff_at, last_sync_at FROM rounds ORDER BY season DESC, round_number DESC LIMIT 1"
+    )
+    .first<RoundRow>();
+
+  return result ?? null;
+}
+
 export async function getRoundBySeasonNumber(
   db: D1Database,
   season: number,

@@ -59,3 +59,8 @@
 
 - **Decisão**: Corrigir lógica do bypass de token em dev: bypass só se token é completamente vazio; qualquer token fornecido é sempre validado contra o banco.
   **Justificativa**: Antes, tokens curtos (<10 chars) em dev passavam sem validação. Agora, se o usuário envia um token, ele é verificado independente do ambiente.
+
+## 2026-04-12
+
+- **Decisão**: `GET /rounds/next` consulta o D1 primeiro e só chama a API externa quando o cache está ausente ou expirado.
+  **Justificativa**: A implementação anterior chamava `fetchCompetition` incondicionalmente a cada request, ignorando o cache de 6 dias armazenado em `rounds.last_sync_at`. Agora: cache válido + cutoff não passou → retorna do D1 sem nenhuma chamada externa; cutoff passou → chama `fetchMatchesByMatchday(round_number + 1)` diretamente, sem precisar de `fetchCompetition`; sem cache → bootstrap via `fetchCompetition`.

@@ -11,7 +11,7 @@ function resolveApiBaseUrl(): string {
   }
 
   throw new Error(
-    "Missing VITE_API_BASE_URL. Configure it to your Worker URL (e.g. https://bolao-brasileirao-api.<subdomain>.workers.dev)."
+    "Missing VITE_API_BASE_URL."
   );
 }
 

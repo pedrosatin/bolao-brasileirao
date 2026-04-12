@@ -6,7 +6,7 @@ compatibility_date = "2026-02-10"
 FOOTBALL_DATA_BASE_URL = "https://api.football-data.org/v4"
 FOOTBALL_DATA_COMPETITION_ID = "2013"
 DEFAULT_EXTERNAL_LINK = "https://g1.globo.com/futebol/brasileirao-serie-a/"
-CORS_ORIGINS = "http://localhost:5173,https://bolao-brasileirao.pages.dev,https://bolao.pedrosatin.com"
+CORS_ORIGINS = "http://localhost:5173,https://bolao.pedrosatin.com"
 ENVIRONMENT = "production"
 
 [[d1_databases]]

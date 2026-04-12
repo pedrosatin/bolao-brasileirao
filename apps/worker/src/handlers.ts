@@ -7,12 +7,12 @@ import {
   fetchCompetition,
   fetchMatchesByMatchday
 } from "./footballData";
-import { getNextTuesdayCutoffUtcIso, hasMatchStartedInBrasilia } from "./time";
+import { getNextTuesdayCutoffUtcIso } from "./time";
 import { calculatePoints } from "./scoring";
 import {
   deletePredictionsByRoundAndName,
+  getLatestRound,
   getMatchesByRoundId,
-  getRoundBySeasonNumber,
   getSubmissionTokenByRoundId,
   upsertMatch,
   upsertRound,
@@ -29,113 +29,96 @@ export async function getNextRound(
   try {
     const now = new Date();
     const nowIso = now.toISOString();
-    const competition = await fetchCompetition(env);
-    const currentMatchday = competition.currentSeason?.currentMatchday;
-    const cacheTtlMs = 6 * 24 * 60 * 60 * 1000;
+    const CACHE_TTL_MS = 6 * 24 * 60 * 60 * 1000;
 
-    let effectiveMatchday = currentMatchday;
-
-    if (currentMatchday) {
-      const seasonYear = resolveSeasonYear(competition.currentSeason?.startDate, []);
-      const cachedRound = await getRoundBySeasonNumber(env.DB, seasonYear, currentMatchday);
-      if (cachedRound?.last_sync_at) {
-        const lastSync = new Date(cachedRound.last_sync_at).getTime();
-        const cutoffExpired = new Date(cachedRound.cutoff_at) <= now;
-
-        if (!Number.isNaN(lastSync) && now.getTime() - lastSync < cacheTtlMs) {
-          const storedMatches = await getMatchesByRoundId(env.DB, cachedRound.id);
-          if (storedMatches.length > 0) {
-            if (cutoffExpired) {
-              effectiveMatchday = currentMatchday + 1;
-            } else {
-              return jsonResponse({
-                round: {
-                  id: cachedRound.id,
-                  season: cachedRound.season,
-                  roundNumber: cachedRound.round_number,
-                  cutoffAt: cachedRound.cutoff_at
-                },
-                matches: storedMatches.map((match) => ({
-                  id: match.id,
-                  utcDate: match.utc_date,
-                  status: match.status,
-                  homeTeam: match.home_team,
-                  awayTeam: match.away_team,
-                  externalLink: match.external_link
-                }))
-              });
-            }
+    // Check DB cache first — avoid calling the external API when possible
+    const cached = await getLatestRound(env.DB);
+    if (cached?.last_sync_at) {
+      const cacheAge = now.getTime() - new Date(cached.last_sync_at).getTime();
+      if (cacheAge < CACHE_TTL_MS) {
+        const matches = await getMatchesByRoundId(env.DB, cached.id);
+        if (matches.length > 0) {
+          if (new Date(cached.cutoff_at) > now) {
+            return roundJsonResponse(cached, matches);
           }
+          // Cutoff passed — advance to next round without calling fetchCompetition
+          return syncRoundAndRespond(env, cached.round_number + 1, cached.season, now, nowIso);
         }
       }
     }
 
-    const apiData = effectiveMatchday
-      ? await fetchMatchesByMatchday(env, effectiveMatchday)
-      : await fetchScheduledMatches(env);
+    // No usable cache — bootstrap via competition API
+    const competition = await fetchCompetition(env);
+    const matchday = competition.currentSeason?.currentMatchday;
+    const season = resolveSeasonYear(competition.currentSeason?.startDate, []);
 
-    const apiMatches = apiData.matches;
-    if (apiMatches.length === 0) {
-      return errorResponse("No upcoming matches found", 404);
+    if (matchday) {
+      return syncRoundAndRespond(env, matchday, season, now, nowIso);
     }
 
-    const futureMatches = apiMatches.filter((match) => new Date(match.utcDate) >= now);
-    if (!effectiveMatchday && futureMatches.length === 0) {
-      return errorResponse("No upcoming matches found", 404);
-    }
-    const matchdayNumber = effectiveMatchday
-      ? effectiveMatchday
-      : Math.min(
-        ...futureMatches.map((match) => (match.matchday === null ? Infinity : match.matchday))
-      );
-    const matchdayMatches = effectiveMatchday
-      ? apiMatches
-      : futureMatches.filter((match) => match.matchday === matchdayNumber);
-    const seasonYear = resolveSeasonYear(competition.currentSeason?.startDate, matchdayMatches);
-    const cutoffAt = getNextTuesdayCutoffUtcIso(now);
+    // No current matchday — scan scheduled matches for the nearest upcoming one
+    const { matches: scheduled } = await fetchScheduledMatches(env);
+    const future = scheduled.filter((m) => new Date(m.utcDate) >= now);
+    if (future.length === 0) return errorResponse("No upcoming matches found", 404);
 
-    const round = await upsertRound(env.DB, seasonYear, matchdayNumber, cutoffAt, nowIso, nowIso);
-
-    for (const match of matchdayMatches) {
-      await upsertMatch(
-        env.DB,
-        {
-          round_id: round.id,
-          api_match_id: match.id,
-          utc_date: match.utcDate,
-          status: match.status,
-          home_team: match.homeTeam.name,
-          away_team: match.awayTeam.name,
-          home_score: match.score.fullTime.home,
-          away_score: match.score.fullTime.away,
-          external_link: env.DEFAULT_EXTERNAL_LINK || DEFAULT_LINK
-        },
-        nowIso
-      );
-    }
-
-    const storedMatches = await getMatchesByRoundId(env.DB, round.id);
-    return jsonResponse({
-      round: {
-        id: round.id,
-        season: round.season,
-        roundNumber: round.round_number,
-        cutoffAt: round.cutoff_at
-      },
-      matches: storedMatches.map((match) => ({
-        id: match.id,
-        utcDate: match.utc_date,
-        status: match.status,
-        homeTeam: match.home_team,
-        awayTeam: match.away_team,
-        externalLink: match.external_link
-      }))
-    });
+    const minDay = Math.min(...future.map((m) => (m.matchday === null ? Infinity : m.matchday)));
+    const dayMatches = future.filter((m) => m.matchday === minDay);
+    return persistAndRespond(env, minDay, resolveSeasonYear(competition.currentSeason?.startDate, dayMatches), dayMatches, now, nowIso);
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";
     console.error("getNextRound error:", message);
     return errorResponse(`Failed to fetch next round: ${message}`, 500);
   }
+}
+
+async function syncRoundAndRespond(env: Env, matchday: number, season: number, now: Date, nowIso: string): Promise<Response> {
+  const { matches } = await fetchMatchesByMatchday(env, matchday);
+  if (matches.length === 0) return errorResponse("No upcoming matches found", 404);
+  return persistAndRespond(env, matchday, season, matches, now, nowIso);
+}
+
+async function persistAndRespond(
+  env: Env,
+  matchday: number,
+  season: number,
+  apiMatches: { id: number; utcDate: string; status: string; homeTeam: { name: string }; awayTeam: { name: string }; score: { fullTime: { home: number | null; away: number | null } } }[],
+  now: Date,
+  nowIso: string
+): Promise<Response> {
+  const cutoffAt = getNextTuesdayCutoffUtcIso(now);
+  const round = await upsertRound(env.DB, season, matchday, cutoffAt, nowIso, nowIso);
+  for (const match of apiMatches) {
+    await upsertMatch(env.DB, {
+      round_id: round.id,
+      api_match_id: match.id,
+      utc_date: match.utcDate,
+      status: match.status,
+      home_team: match.homeTeam.name,
+      away_team: match.awayTeam.name,
+      home_score: match.score.fullTime.home,
+      away_score: match.score.fullTime.away,
+      external_link: env.DEFAULT_EXTERNAL_LINK || DEFAULT_LINK
+    }, nowIso);
+  }
+  const stored = await getMatchesByRoundId(env.DB, round.id);
+  return roundJsonResponse(round, stored);
+}
+
+function roundJsonResponse(
+  round: { id: number; season: number; round_number: number; cutoff_at: string },
+  matches: { id: number; utc_date: string; status: string; home_team: string; away_team: string; external_link: string | null }[]
+): Response {
+  return jsonResponse({
+    round: { id: round.id, season: round.season, roundNumber: round.round_number, cutoffAt: round.cutoff_at },
+    matches: matches.map((m) => ({
+      id: m.id,
+      utcDate: m.utc_date,
+      status: m.status,
+      homeTeam: m.home_team,
+      awayTeam: m.away_team,
+      externalLink: m.external_link
+    }))
+  });
 }
 
 function resolveSeasonYear(seasonStart: string | undefined, matches: { utcDate: string }[]): number {
