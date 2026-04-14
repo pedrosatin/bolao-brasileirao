@@ -53,3 +53,20 @@ Interface simples e mobile-first para listar jogos, coletar palpites, exibir ran
 - Tema baseado em variáveis CSS em `src/styles/global.css`.
 - Alternância automática com `@media (prefers-color-scheme: dark)`.
 - CSS crítico inline nos HTMLs de entrada (`index.html`, `rankings.html`, `history.html`, `admin.html`) para evitar flash de light mode antes do bundle carregar.
+
+## Analytics (Google Tag Manager)
+
+- GTM ID: `GTM-KFNL362J`
+- O snippet `<script>` do GTM é adicionado ao final do `<head>` (antes de `</head>`) em cada um dos 4 HTMLs de entrada. O snippet `<noscript>` é adicionado imediatamente após `<body>` abre.
+- O script GTM é assíncrono por design (`j.async=true`) — não bloqueia renderização.
+- Eventos nativos capturados automaticamente pelo GTM (sem código extra): `page_view` a cada carregamento de página, scroll depth, cliques em links externos.
+- **Utilitário `src/utils/analytics.ts`**: exporta `trackEvent(eventName, params?)` que:
+  - Em `import.meta.env.DEV` (local): faz `console.log('[GTM dev]', ...)` e não envia nada ao GTM.
+  - Em produção: empurra para `window.dataLayer` consumido pelo GTM.
+- **Eventos customizados rastreados**:
+
+| Evento                       | Onde                                             | Parâmetros                                      |
+| ---------------------------- | ------------------------------------------------ | ----------------------------------------------- |
+| `predictions_submit_success` | `HomePage.tsx` — após POST bem-sucedido          | `round_id`, `round_number`, `predictions_count` |
+| `predictions_submit_error`   | `HomePage.tsx` — no catch do POST                | `error_message`                                 |
+| `history_round_select`       | `HistoryPage.tsx` — onChange do select de rodada | `round_id`, `round_number`                      |

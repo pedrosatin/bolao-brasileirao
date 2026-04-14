@@ -7,6 +7,7 @@ import {
 import { RankingEntry, RoundHistory, RoundPrediction } from '../types'
 import Alert from '../components/Alert'
 import { formatDate } from '../utils/date'
+import { trackEvent } from '../utils/analytics'
 
 export default function HistoryPage() {
   const [history, setHistory] = useState<RoundHistory[]>([])
@@ -108,6 +109,10 @@ export default function HistoryPage() {
             )
             if (round) {
               setSelectedRound(round)
+              trackEvent('history_round_select', {
+                round_id: round.id,
+                round_number: round.round_number,
+              })
             }
           }}
           style={{
@@ -180,7 +185,12 @@ export default function HistoryPage() {
                     }}
                   >
                     <strong style={{ fontSize: '1rem' }}>{participant}</strong>
-                    <span style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem' }}>
+                    <span
+                      style={{
+                        color: 'var(--color-text-muted)',
+                        fontSize: '0.85rem',
+                      }}
+                    >
                       {items.length} {items.length === 1 ? 'jogo' : 'jogos'}
                     </span>
                   </div>
@@ -201,7 +211,8 @@ export default function HistoryPage() {
                           <th
                             style={{
                               paddingBottom: '8px',
-                              borderBottom: '1px solid var(--color-border-light)',
+                              borderBottom:
+                                '1px solid var(--color-border-light)',
                               width: '45%',
                             }}
                           >
@@ -210,7 +221,8 @@ export default function HistoryPage() {
                           <th
                             style={{
                               paddingBottom: '8px',
-                              borderBottom: '1px solid var(--color-border-light)',
+                              borderBottom:
+                                '1px solid var(--color-border-light)',
                               width: '20%',
                             }}
                           >
@@ -219,7 +231,8 @@ export default function HistoryPage() {
                           <th
                             style={{
                               paddingBottom: '8px',
-                              borderBottom: '1px solid var(--color-border-light)',
+                              borderBottom:
+                                '1px solid var(--color-border-light)',
                               width: '15%',
                             }}
                           >
@@ -228,7 +241,8 @@ export default function HistoryPage() {
                           <th
                             style={{
                               paddingBottom: '8px',
-                              borderBottom: '1px solid var(--color-border-light)',
+                              borderBottom:
+                                '1px solid var(--color-border-light)',
                               width: '20%',
                               textAlign: 'right',
                             }}

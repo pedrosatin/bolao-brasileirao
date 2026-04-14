@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Match, Round } from '../types'
 import { hasMatchStarted } from '../utils/date'
 import { submitPredictions } from '../services/api'
+import { trackEvent } from '../utils/analytics'
 import Alert from '../components/Alert'
 import MatchCard from '../components/MatchCard'
 
@@ -126,14 +127,20 @@ export default function HomePage({
         predictions,
       })
       setSuccess('Palpites enviados com sucesso!')
+      trackEvent('predictions_submit_success', {
+        round_id: round.id,
+        round_number: round.roundNumber,
+        predictions_count: predictions.length,
+      })
       // Zera inputs após sucesso
       setName('')
       setSubmissionToken('')
       setScores({})
     } catch (err) {
-      setSubmitError(
-        err instanceof Error ? err.message : 'Erro ao enviar palpites',
-      )
+      const message =
+        err instanceof Error ? err.message : 'Erro ao enviar palpites'
+      setSubmitError(message)
+      trackEvent('predictions_submit_error', { error_message: message })
     } finally {
       setSubmitting(false)
     }

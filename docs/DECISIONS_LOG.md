@@ -48,6 +48,11 @@
 - **Decisão**: Restringir o fallback de CORS de `"*"` (aceitar tudo) para `[]` (negar tudo) quando `CORS_ORIGINS` não está configurado.
   **Justificativa**: Reduzir superfície de ataque. Se a variável não for configurada, nenhuma origin é aceita, ao invés de aceitar todas.
 
+## 2026-04-14
+
+- **Decisão**: Adicionar Google Tag Manager (`GTM-KFNL362J`) via snippet assíncrono nos 4 HTMLs de entrada; eventos customizados via utilitário `src/utils/analytics.ts`.
+  **Justificativa**: Coletar dados de uso (page views, submissão de palpites, seleção de rodada) sem impacto de performance (script async). Em ambiente de desenvolvimento (`import.meta.env.DEV`) nenhum dado é enviado ao GTM — apenas `console.log` — para evitar contaminação dos dados analíticos.
+
 - **Decisão**: Mover `CORS_ORIGINS` de produção do `wrangler.toml` para GitHub Actions variable.
   **Justificativa**: Evitar expor a URL de produção no repositório público. O `wrangler.toml` agora contém apenas `http://localhost:5173`.
 
