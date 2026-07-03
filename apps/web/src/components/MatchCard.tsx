@@ -8,6 +8,15 @@ type MatchCardProps = {
   disabled?: boolean
 }
 
+const inputStyle = {
+  width: '64px',
+  padding: '8px',
+  borderRadius: '8px',
+  border: '1px solid var(--color-border-default)',
+  background: 'var(--color-bg-surface)',
+  color: 'var(--color-text-primary)',
+}
+
 export default function MatchCard({
   match,
   value,
@@ -42,14 +51,7 @@ export default function MatchCard({
             onChange(match.id, Number(event.target.value), value.away)
           }
           onFocus={(event) => event.target.select()}
-          style={{
-            width: '64px',
-            padding: '8px',
-            borderRadius: '8px',
-            border: '1px solid var(--color-border-default)',
-            background: 'var(--color-bg-surface)',
-            color: 'var(--color-text-primary)',
-          }}
+          style={inputStyle}
         />
         <span style={{ fontWeight: 600 }}>x</span>
         <input
@@ -61,14 +63,7 @@ export default function MatchCard({
             onChange(match.id, value.home, Number(event.target.value))
           }
           onFocus={(event) => event.target.select()}
-          style={{
-            width: '64px',
-            padding: '8px',
-            borderRadius: '8px',
-            border: '1px solid var(--color-border-default)',
-            background: 'var(--color-bg-surface)',
-            color: 'var(--color-text-primary)',
-          }}
+          style={inputStyle}
         />
       </div>
 
