@@ -400,10 +400,10 @@ export async function createPredictions(
     return errorResponse("Round not found", 404);
   }
 
-  const isDev = env.ENVIRONMENT === 'development';
+  const isDevBypass = env.ENVIRONMENT === 'development' && env.DEV_BYPASS_TOKEN_CHECK === 'true';
 
   if (!submissionToken || submissionToken.trim().length === 0) {
-    if (!isDev) {
+    if (!isDevBypass) {
       return errorResponse("Submission token required", 401);
     }
   } else {
