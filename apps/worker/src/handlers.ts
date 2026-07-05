@@ -479,14 +479,14 @@ export async function createPredictions(
 }
 
 function requireOriginAllowed(request: Request, env: Env): Response | null {
-  const origin = request.headers.get("Origin");
-  if (!origin) {
-    return null;
-  }
-
   const allowed = parseAllowedOrigins(env.CORS_ORIGINS);
   if (allowed.includes("*")) {
     return null;
+  }
+
+  const origin = request.headers.get("Origin");
+  if (!origin) {
+    return errorResponse("Missing Origin header", 403);
   }
 
   if (!allowed.includes(origin)) {
