@@ -33,6 +33,18 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
   return response.json() as Promise<T>;
 }
 
+async function adminRequest<T>(path: string, adminToken: string, options?: RequestInit): Promise<T> {
+  const mergedOptions = {
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      "X-Admin-Token": adminToken,
+      ...options?.headers
+    }
+  };
+  return request<T>(path, mergedOptions);
+}
+
 export async function fetchNextRound(): Promise<{ round: Round; matches: Match[] }> {
   return request("/rounds/next");
 }
@@ -76,12 +88,8 @@ export async function adminGenerateSubmissionToken(
   roundId: number,
   adminToken: string
 ): Promise<{ roundId: number; submissionToken: string; expiresAt: string }> {
-  return request(`/admin/rounds/${roundId}/submission-token`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "X-Admin-Token": adminToken
-    }
+  return adminRequest(`/admin/rounds/${roundId}/submission-token`, adminToken, {
+    method: "POST"
   });
 }
 
@@ -90,12 +98,8 @@ export async function adminDeletePredictionsByName(
   participantName: string,
   adminToken: string
 ): Promise<{ roundId: number; participantName: string; deletedPredictions: number; deletedScoreRows: number }> {
-  return request(`/admin/rounds/${roundId}/predictions/${encodeURIComponent(participantName)}`, {
-    method: "DELETE",
-    headers: {
-      "Content-Type": "application/json",
-      "X-Admin-Token": adminToken
-    }
+  return adminRequest(`/admin/rounds/${roundId}/predictions/${encodeURIComponent(participantName)}`, adminToken, {
+    method: "DELETE"
   });
 }
 
@@ -103,21 +107,13 @@ export async function adminRecalculateRound(
   roundId: number,
   adminToken: string
 ): Promise<{ roundId: number; message: string }> {
-  return request(`/rounds/${roundId}/recalculate`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "X-Admin-Token": adminToken
-    }
+  return adminRequest(`/rounds/${roundId}/recalculate`, adminToken, {
+    method: "POST"
   });
 }
 
 export async function adminSyncFinishedMatches(adminToken: string): Promise<{ message: string }> {
-  return request("/admin/sync-finished", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "X-Admin-Token": adminToken
-    }
+  return adminRequest("/admin/sync-finished", adminToken, {
+    method: "POST"
   });
 }
