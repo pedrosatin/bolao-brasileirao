@@ -10,6 +10,7 @@ export interface Env {
   CORS_ORIGINS?: string;
   ADMIN_TOKEN?: string;
   ENVIRONMENT?: string;
+  DEV_BYPASS_TOKEN_CHECK?: string;
 }
 
 export default {
