@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { createContext, useContext, useMemo, useState } from 'react'
 import Alert from '../components/Alert'
 import {
   adminDeletePredictionsByName,
@@ -7,134 +7,49 @@ import {
   adminRecalculateRound,
 } from '../services/api'
 
-export default function AdminPage() {
-  const [adminToken, setAdminToken] = useState('')
-  const [roundIdText, setRoundIdText] = useState('')
-  const [participantName, setParticipantName] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [success, setSuccess] = useState<string | null>(null)
-  const [generatedToken, setGeneratedToken] = useState<string | null>(null)
-  const [expiresAt, setExpiresAt] = useState<string | null>(null)
+// --- Context & Hook ---
+interface AdminContextType {
+  adminToken: string
+  setAdminToken: (val: string) => void
+  roundIdText: string
+  setRoundIdText: (val: string) => void
+  loading: boolean
+  setLoading: (val: boolean) => void
+  error: string | null
+  setError: (val: string | null) => void
+  success: string | null
+  setSuccess: (val: string | null) => void
+  roundId: number
+  canRun: boolean
+  canSync: boolean
+}
 
-  const roundId = useMemo(() => Number(roundIdText), [roundIdText])
-  const roundIdValid = !Number.isNaN(roundId) && roundId > 0
+const AdminContext = createContext<AdminContextType | null>(null)
 
-  const adminTokenFilled = adminToken.trim().length > 0
-  const canRun = adminTokenFilled && roundIdValid && !loading
-  const canSync = adminTokenFilled && !loading
-
-  const handleGenerateToken = async () => {
-    setError(null)
-    setSuccess(null)
-    setGeneratedToken(null)
-    setExpiresAt(null)
-
-    if (!canRun) {
-      setError('Informe ADMIN token e o id da rodada.')
-      return
-    }
-
-    setLoading(true)
-    try {
-      const result = await adminGenerateSubmissionToken(
-        roundId,
-        adminToken.trim(),
-      )
-      setGeneratedToken(result.submissionToken)
-      setExpiresAt(result.expiresAt)
-      setSuccess('Token gerado com sucesso.')
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao gerar token')
-    } finally {
-      setLoading(false)
-    }
+function useAdmin() {
+  const context = useContext(AdminContext)
+  if (!context) {
+    throw new Error('useAdmin must be used within an AdminProvider')
   }
+  return context
+}
 
-  const handleDeletePredictions = async () => {
-    setError(null)
-    setSuccess(null)
+// --- Subcomponents ---
 
-    if (!canRun) {
-      setError('Informe ADMIN token e o id da rodada.')
-      return
-    }
-
-    if (participantName.trim().length < 2) {
-      setError('Informe o nome do participante.')
-      return
-    }
-
-    setLoading(true)
-    try {
-      const result = await adminDeletePredictionsByName(
-        roundId,
-        participantName.trim(),
-        adminToken.trim(),
-      )
-      setSuccess(
-        `Removido. predictions=${result.deletedPredictions}, scores=${result.deletedScoreRows}`,
-      )
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : 'Erro ao deletar predictions',
-      )
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const handleSyncFinishedMatchesClick = async () => {
-    setError(null)
-    setSuccess(null)
-
-    if (!canSync) {
-      setError('Informe o ADMIN token.')
-      return
-    }
-
-    setLoading(true)
-    try {
-      const result = await adminSyncFinishedMatches(adminToken.trim())
-      setSuccess(`Sincronização finalizada: ${result.message}`)
-    } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : 'Erro ao sincronizar partidas finalizadas',
-      )
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const handleRecalculateRound = async () => {
-    setError(null)
-    setSuccess(null)
-
-    if (!canRun) {
-      setError('Informe ADMIN token e o id da rodada.')
-      return
-    }
-
-    setLoading(true)
-    try {
-      const result = await adminRecalculateRound(roundId, adminToken.trim())
-      setSuccess(
-        `Pontuação da rodada ${result.roundId} recalculada (${result.message}).`,
-      )
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao recalcular pontos')
-    } finally {
-      setLoading(false)
-    }
-  }
-
+function AdminAlerts() {
+  const { error, success } = useAdmin()
   return (
-    <div style={{ display: 'grid', gap: '16px' }}>
+    <>
       {error && <Alert type="error" message={error} />}
       {success && <Alert type="success" message={success} />}
+    </>
+  )
+}
 
+function AdminHeader() {
+  const { adminToken, setAdminToken, roundIdText, setRoundIdText } = useAdmin()
+  return (
+    <>
       <label style={{ display: 'grid', gap: '8px' }}>
         Admin token
         <input
@@ -166,7 +81,44 @@ export default function AdminPage() {
           }}
         />
       </label>
+    </>
+  )
+}
 
+function AdminTokenGenerator() {
+  const { adminToken, roundId, canRun, loading, setLoading, setError, setSuccess } = useAdmin()
+  const [generatedToken, setGeneratedToken] = useState<string | null>(null)
+  const [expiresAt, setExpiresAt] = useState<string | null>(null)
+
+  const handleGenerateToken = async () => {
+    setError(null)
+    setSuccess(null)
+    setGeneratedToken(null)
+    setExpiresAt(null)
+
+    if (!canRun) {
+      setError('Informe ADMIN token e o id da rodada.')
+      return
+    }
+
+    setLoading(true)
+    try {
+      const result = await adminGenerateSubmissionToken(
+        roundId,
+        adminToken.trim(),
+      )
+      setGeneratedToken(result.submissionToken)
+      setExpiresAt(result.expiresAt)
+      setSuccess('Token gerado com sucesso.')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erro ao gerar token')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <>
       <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
         <button
           onClick={handleGenerateToken}
@@ -220,67 +172,167 @@ export default function AdminPage() {
           )}
         </div>
       )}
+    </>
+  )
+}
 
-      <div
+function AdminSyncMatches() {
+  const { adminToken, canSync, loading, setLoading, setError, setSuccess } = useAdmin()
+
+  const handleSyncFinishedMatchesClick = async () => {
+    setError(null)
+    setSuccess(null)
+
+    if (!canSync) {
+      setError('Informe o ADMIN token.')
+      return
+    }
+
+    setLoading(true)
+    try {
+      const result = await adminSyncFinishedMatches(adminToken.trim())
+      setSuccess(`Sincronização finalizada: ${result.message}`)
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : 'Erro ao sincronizar partidas finalizadas',
+      )
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <div
+      style={{
+        display: 'grid',
+        gap: '12px',
+        padding: '16px',
+        borderRadius: '12px',
+        border: '1px solid var(--color-border-light)',
+        background: 'var(--color-bg-muted)',
+      }}
+    >
+      <div style={{ fontWeight: 600 }}>Sincronizar partidas finalizadas</div>
+      <p style={{ margin: 0, fontSize: '14px', color: 'var(--color-text-secondary)' }}>
+        Busca os resultados confirmados na Football-Data e atualiza as
+        partidas da rodada atual antes do recálculo.
+      </p>
+      <button
+        onClick={handleSyncFinishedMatchesClick}
+        disabled={!canSync}
         style={{
-          display: 'grid',
-          gap: '12px',
-          padding: '16px',
+          padding: '12px 16px',
           borderRadius: '12px',
-          border: '1px solid var(--color-border-light)',
-          background: 'var(--color-bg-muted)',
+          background: canSync ? 'var(--color-accent-cyan)' : 'var(--color-text-light)',
+          color: '#fff',
+          fontWeight: 600,
         }}
       >
-        <div style={{ fontWeight: 600 }}>Sincronizar partidas finalizadas</div>
-        <p style={{ margin: 0, fontSize: '14px', color: 'var(--color-text-secondary)' }}>
-          Busca os resultados confirmados na Football-Data e atualiza as
-          partidas da rodada atual antes do recálculo.
-        </p>
-        <button
-          onClick={handleSyncFinishedMatchesClick}
-          disabled={!canSync}
-          style={{
-            padding: '12px 16px',
-            borderRadius: '12px',
-            background: canSync ? 'var(--color-accent-cyan)' : 'var(--color-text-light)',
-            color: '#fff',
-            fontWeight: 600,
-          }}
-        >
-          {loading ? 'Processando...' : 'Sincronizar resultados'}
-        </button>
-      </div>
+        {loading ? 'Processando...' : 'Sincronizar resultados'}
+      </button>
+    </div>
+  )
+}
 
-      <div
+function AdminRecalculateRound() {
+  const { adminToken, roundId, canRun, loading, setLoading, setError, setSuccess } = useAdmin()
+
+  const handleRecalculateRound = async () => {
+    setError(null)
+    setSuccess(null)
+
+    if (!canRun) {
+      setError('Informe ADMIN token e o id da rodada.')
+      return
+    }
+
+    setLoading(true)
+    try {
+      const result = await adminRecalculateRound(roundId, adminToken.trim())
+      setSuccess(
+        `Pontuação da rodada ${result.roundId} recalculada (${result.message}).`,
+      )
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erro ao recalcular pontos')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <div
+      style={{
+        display: 'grid',
+        gap: '12px',
+        padding: '16px',
+        borderRadius: '12px',
+        border: '1px solid var(--color-border-light)',
+        background: 'var(--color-bg-muted)',
+      }}
+    >
+      <div style={{ fontWeight: 600 }}>Reprocessar pontuação da rodada</div>
+      <p style={{ margin: 0, fontSize: '14px', color: 'var(--color-text-secondary)' }}>
+        Força a leitura dos resultados gravados na rodada e recalcula os
+        pontos de todos os participantes.
+      </p>
+      <button
+        onClick={handleRecalculateRound}
+        disabled={!canRun}
         style={{
-          display: 'grid',
-          gap: '12px',
-          padding: '16px',
+          padding: '12px 16px',
           borderRadius: '12px',
-          border: '1px solid var(--color-border-light)',
-          background: 'var(--color-bg-muted)',
+          background: canRun ? 'var(--color-accent-green)' : 'var(--color-text-light)',
+          color: '#fff',
+          fontWeight: 600,
         }}
       >
-        <div style={{ fontWeight: 600 }}>Reprocessar pontuação da rodada</div>
-        <p style={{ margin: 0, fontSize: '14px', color: 'var(--color-text-secondary)' }}>
-          Força a leitura dos resultados gravados na rodada e recalcula os
-          pontos de todos os participantes.
-        </p>
-        <button
-          onClick={handleRecalculateRound}
-          disabled={!canRun}
-          style={{
-            padding: '12px 16px',
-            borderRadius: '12px',
-            background: canRun ? 'var(--color-accent-green)' : 'var(--color-text-light)',
-            color: '#fff',
-            fontWeight: 600,
-          }}
-        >
-          {loading ? 'Processando...' : 'Recalcular pontuação'}
-        </button>
-      </div>
+        {loading ? 'Processando...' : 'Recalcular pontuação'}
+      </button>
+    </div>
+  )
+}
 
+function AdminDeletePredictions() {
+  const { adminToken, roundId, canRun, loading, setLoading, setError, setSuccess } = useAdmin()
+  const [participantName, setParticipantName] = useState('')
+
+  const handleDeletePredictions = async () => {
+    setError(null)
+    setSuccess(null)
+
+    if (!canRun) {
+      setError('Informe ADMIN token e o id da rodada.')
+      return
+    }
+
+    if (participantName.trim().length < 2) {
+      setError('Informe o nome do participante.')
+      return
+    }
+
+    setLoading(true)
+    try {
+      const result = await adminDeletePredictionsByName(
+        roundId,
+        participantName.trim(),
+        adminToken.trim(),
+      )
+      setSuccess(
+        `Removido. predictions=${result.deletedPredictions}, scores=${result.deletedScoreRows}`,
+      )
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : 'Erro ao deletar predictions',
+      )
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <>
       <hr />
 
       <label style={{ display: 'grid', gap: '8px' }}>
@@ -312,6 +364,50 @@ export default function AdminPage() {
       >
         {loading ? 'Processando...' : 'Deletar predictions'}
       </button>
-    </div>
+    </>
+  )
+}
+
+export default function AdminPage() {
+  const [adminToken, setAdminToken] = useState('')
+  const [roundIdText, setRoundIdText] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState<string | null>(null)
+
+  const roundId = useMemo(() => Number(roundIdText), [roundIdText])
+  const roundIdValid = !Number.isNaN(roundId) && roundId > 0
+
+  const adminTokenFilled = adminToken.trim().length > 0
+  const canRun = adminTokenFilled && roundIdValid && !loading
+  const canSync = adminTokenFilled && !loading
+
+  return (
+    <AdminContext.Provider
+      value={{
+        adminToken,
+        setAdminToken,
+        roundIdText,
+        setRoundIdText,
+        loading,
+        setLoading,
+        error,
+        setError,
+        success,
+        setSuccess,
+        roundId,
+        canRun,
+        canSync,
+      }}
+    >
+      <div style={{ display: 'grid', gap: '16px' }}>
+        <AdminAlerts />
+        <AdminHeader />
+        <AdminTokenGenerator />
+        <AdminSyncMatches />
+        <AdminRecalculateRound />
+        <AdminDeletePredictions />
+      </div>
+    </AdminContext.Provider>
   )
 }
