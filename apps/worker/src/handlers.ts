@@ -524,7 +524,15 @@ async function requireAdmin(request: Request, env: Env): Promise<Response | null
   // Timing-safe comparison via constant-time SHA-256 hash comparison
   const expectedHash = await sha256Hex(expected);
   const providedHash = await sha256Hex(provided);
-  if (expectedHash !== providedHash) {
+
+  const encoder = new TextEncoder();
+  const expectedBytes = encoder.encode(expectedHash);
+  const providedBytes = encoder.encode(providedHash);
+
+  if (
+    expectedBytes.byteLength !== providedBytes.byteLength ||
+    !crypto.subtle.timingSafeEqual(expectedBytes, providedBytes)
+  ) {
     return errorResponse("Invalid request", 401);
   }
 
