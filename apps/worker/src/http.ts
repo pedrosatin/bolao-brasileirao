@@ -18,7 +18,7 @@ function parseAllowedOrigins(value?: string): string[] {
 function resolveCorsOrigin(requestOrigin: string | null, env: CorsEnv): string | null {
   const allowed = parseAllowedOrigins(env.CORS_ORIGINS);
   if (allowed.includes("*")) {
-    return "*";
+    return requestOrigin ? requestOrigin : "*";
   }
 
   if (!requestOrigin) {
