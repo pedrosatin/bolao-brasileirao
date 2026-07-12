@@ -419,7 +419,7 @@ export async function createPredictions(
     }
 
     const providedHash = await sha256Hex(submissionToken.trim());
-    if (providedHash !== tokenRow.token_hash) {
+    if (!timingSafeEqual(providedHash, tokenRow.token_hash)) {
       return errorResponse("Invalid submission token", 403);
     }
   }
@@ -524,7 +524,7 @@ async function requireAdmin(request: Request, env: Env): Promise<Response | null
   // Timing-safe comparison via constant-time SHA-256 hash comparison
   const expectedHash = await sha256Hex(expected);
   const providedHash = await sha256Hex(provided);
-  if (expectedHash !== providedHash) {
+  if (!timingSafeEqual(expectedHash, providedHash)) {
     return errorResponse("Invalid request", 401);
   }
 
@@ -542,6 +542,17 @@ async function sha256Hex(value: string): Promise<string> {
   const data = new TextEncoder().encode(value);
   const digest = await crypto.subtle.digest("SHA-256", data);
   return toHex(digest);
+}
+
+function timingSafeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) {
+    return false;
+  }
+  let result = 0;
+  for (let i = 0; i < a.length; i++) {
+    result |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+  return result === 0;
 }
 
 function base64UrlEncode(bytes: Uint8Array): string {

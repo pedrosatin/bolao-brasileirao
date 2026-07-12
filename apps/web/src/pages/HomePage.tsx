@@ -8,6 +8,14 @@ import MatchCard from '../components/MatchCard'
 
 const initialScore = { home: 0, away: 0 }
 
+const inputStyle = {
+  padding: '10px',
+  borderRadius: '8px',
+  border: '1px solid var(--color-border-default)',
+  background: 'var(--color-bg-surface)',
+  color: 'var(--color-text-primary)',
+}
+
 function isMatchLocked(match: Match, referenceDate: Date): boolean {
   return hasMatchStarted(match.utcDate, referenceDate)
 }
@@ -190,13 +198,7 @@ export default function HomePage({
           value={name}
           onChange={(event) => setName(event.target.value)}
           placeholder="Seu nome"
-          style={{
-            padding: '10px',
-            borderRadius: '8px',
-            border: '1px solid var(--color-border-default)',
-            background: 'var(--color-bg-surface)',
-            color: 'var(--color-text-primary)',
-          }}
+          style={inputStyle}
         />
       </label>
 
@@ -206,13 +208,7 @@ export default function HomePage({
           value={submissionToken}
           onChange={(event) => setSubmissionToken(event.target.value)}
           placeholder="Resposta"
-          style={{
-            padding: '10px',
-            borderRadius: '8px',
-            border: '1px solid var(--color-border-default)',
-            background: 'var(--color-bg-surface)',
-            color: 'var(--color-text-primary)',
-          }}
+          style={inputStyle}
         />
       </label>
 

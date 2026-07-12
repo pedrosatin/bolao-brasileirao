@@ -1,0 +1,214 @@
+{
+  "/home/satin/Work/personal/bolao-brasileirao/apps/web/vite.config.ts": {
+    "mtime": 1777740154.0644822,
+    "hash": "56bda91f63360289e354215d08d491ba"
+  },
+  "/home/satin/Work/personal/bolao-brasileirao/apps/web/src/App.tsx": {
+    "mtime": 1777740154.0631967,
+    "hash": "862c9321988937ff4baf04f067fa7557"
+  },
+  "/home/satin/Work/personal/bolao-brasileirao/apps/web/src/main.tsx": {
+    "mtime": 1777740154.0633972,
+    "hash": "79820281de63da030769c641a5f69cf5"
+  },
+  "/home/satin/Work/personal/bolao-brasileirao/apps/web/src/vite-env.d.ts": {
+    "mtime": 1777740154.0644822,
+    "hash": "0352474ba2918efe13895edbc3780d94"
+  },
+  "/home/satin/Work/personal/bolao-brasileirao/apps/web/src/components/Alert.tsx": {
+    "mtime": 1777740154.0633361,
+    "hash": "a5de195a494dcc7144cf400a8d96d003"
+  },
+  "/home/satin/Work/personal/bolao-brasileirao/apps/web/src/components/Layout.tsx": {
+    "mtime": 1777740154.0633972,
+    "hash": "f95a716bc60ed34033a71b133d1eae42"
+  },
+  "/home/satin/Work/personal/bolao-brasileirao/apps/web/src/components/Tabs.tsx": {
+    "mtime": 1777740154.0633972,
+    "hash": "4dbb927dae688a3e740f2f175ba2fde6"
+  },
+  "/home/satin/Work/personal/bolao-brasileirao/apps/web/src/components/MatchCard.tsx": {
+    "mtime": 1783264990.0539918,
+    "hash": "ab41818d86d450081fa65f42947d2960"
+  },
+  "/home/satin/Work/personal/bolao-brasileirao/apps/web/src/hooks/useRoundData.ts": {
+    "mtime": 1777740154.0633972,
+    "hash": "5ab55d604477662c6c31158e70772135"
+  },
+  "/home/satin/Work/personal/bolao-brasileirao/apps/web/src/hooks/useHistoryData.ts": {
+    "mtime": 1783264990.0539918,
+    "hash": "b9f7ef98888d6770af17abcf088f1e5e"
+  },
+  "/home/satin/Work/personal/bolao-brasileirao/apps/web/src/pages/RankingsPage.tsx": {
+    "mtime": 1777740154.0637522,
+    "hash": "cbd222180e073eb08b0ad036c8a6573d"
+  },
+  "/home/satin/Work/personal/bolao-brasileirao/apps/web/src/pages/AdminPage.tsx": {
+    "mtime": 1783264990.0539918,
+    "hash": "c7dcac8f405a6a2637cf2b8cd0f1b0dd"
+  },
+  "/home/satin/Work/personal/bolao-brasileirao/apps/web/src/pages/HistoryPage.tsx": {
+    "mtime": 1783264990.0539918,
+    "hash": "4d92715cb094bba3b2a75236f5c6081b"
+  },
+  "/home/satin/Work/personal/bolao-brasileirao/apps/web/src/pages/HomePage.tsx": {
+    "mtime": 1783376373.8056605,
+    "hash": "c2b835cb41b2ad9cf8ecce98398dc922"
+  },
+  "/home/satin/Work/personal/bolao-brasileirao/apps/web/src/services/api.ts": {
+    "mtime": 1783264990.0539918,
+    "hash": "641ba357dcca6c49fa937bcca77bd38a"
+  },
+  "/home/satin/Work/personal/bolao-brasileirao/apps/web/src/types/index.ts": {
+    "mtime": 1777740154.0637522,
+    "hash": "58b7ab9506c31399d824bf51bb7e3df5"
+  },
+  "/home/satin/Work/personal/bolao-brasileirao/apps/web/src/utils/analytics.ts": {
+    "mtime": 1777740154.0637522,
+    "hash": "038fc80071d6b140c80a54b977607ff5"
+  },
+  "/home/satin/Work/personal/bolao-brasileirao/apps/web/src/utils/date.ts": {
+    "mtime": 1783264990.0539918,
+    "hash": "b3d523f8fb3ef0fac921a66d919533bf"
+  },
+  "/home/satin/Work/personal/bolao-brasileirao/apps/web/src/utils/date.test.ts": {
+    "mtime": 1783376243.3580334,
+    "hash": "898ecd8c639cecb9181238862bbd1207"
+  },
+  "/home/satin/Work/personal/bolao-brasileirao/apps/worker/schema.sql": {
+    "mtime": 1777740154.0647626,
+    "hash": "521f0ef453a49436ac95df1e83ed71a4"
+  },
+  "/home/satin/Work/personal/bolao-brasileirao/apps/worker/migrations/0001_init.sql": {
+    "mtime": 1777740154.064702,
+    "hash": "de3865b4fa8001e809442edc89ced955"
+  },
+  "/home/satin/Work/personal/bolao-brasileirao/apps/worker/migrations/0002_submission_tokens.sql": {
+    "mtime": 1777740154.0647626,
+    "hash": "e09756d5ff239ba6c8731a7db682a3f5"
+  },
+  "/home/satin/Work/personal/bolao-brasileirao/apps/worker/src/db.ts": {
+    "mtime": 1777740154.0647626,
+    "hash": "3ae5f65695bf6e9c322cc8a0598cad7d"
+  },
+  "/home/satin/Work/personal/bolao-brasileirao/apps/worker/src/routes.ts": {
+    "mtime": 1777740154.0654798,
+    "hash": "bb30c1e490b6046bd14320a15d3809b7"
+  },
+  "/home/satin/Work/personal/bolao-brasileirao/apps/worker/src/scheduler.ts": {
+    "mtime": 1777740154.0654798,
+    "hash": "e4c63c9ca6605a9c2201e8886197368f"
+  },
+  "/home/satin/Work/personal/bolao-brasileirao/apps/worker/src/scoring.ts": {
+    "mtime": 1777740154.0654798,
+    "hash": "56b5f27545704c5a3e5834899af0ef96"
+  },
+  "/home/satin/Work/personal/bolao-brasileirao/apps/worker/src/time.ts": {
+    "mtime": 1777740154.0654798,
+    "hash": "616446007572442d70eb577346442f6c"
+  },
+  "/home/satin/Work/personal/bolao-brasileirao/apps/worker/src/validation.ts": {
+    "mtime": 1777740154.0654798,
+    "hash": "a661d3b6611c2218b3791a6e055a47a4"
+  },
+  "/home/satin/Work/personal/bolao-brasileirao/apps/worker/src/footballData.ts": {
+    "mtime": 1783264990.0539918,
+    "hash": "bd5eb59302bb8d3ca3148fab87ebeceb"
+  },
+  "/home/satin/Work/personal/bolao-brasileirao/apps/worker/src/index.ts": {
+    "mtime": 1783264990.054992,
+    "hash": "55ddd3aadd33fc906be1f8dc933f15e6"
+  },
+  "/home/satin/Work/personal/bolao-brasileirao/apps/worker/src/scoring.test.ts": {
+    "mtime": 1783264990.054992,
+    "hash": "d6592f1473dc38f079128f4ce59ebc52"
+  },
+  "/home/satin/Work/personal/bolao-brasileirao/apps/worker/src/validation.test.ts": {
+    "mtime": 1783264990.054992,
+    "hash": "d1e16ebb1709c48bd37747df6c8fb10b"
+  },
+  "/home/satin/Work/personal/bolao-brasileirao/apps/worker/src/time.test.ts": {
+    "mtime": 1783376314.949819,
+    "hash": "0e7ad2019d91e1e27289df94450e26e3"
+  },
+  "/home/satin/Work/personal/bolao-brasileirao/apps/worker/src/handlers.ts": {
+    "mtime": 1783376373.8066607,
+    "hash": "6ca991ac4a9f13b908bc253d1ff48935"
+  },
+  "/home/satin/Work/personal/bolao-brasileirao/apps/worker/src/http.test.ts": {
+    "mtime": 1783376373.8066607,
+    "hash": "0a11455e8a33efba68164134ef15df4f"
+  },
+  "/home/satin/Work/personal/bolao-brasileirao/apps/worker/src/http.ts": {
+    "mtime": 1783376373.8066607,
+    "hash": "0fa6c2473e4cde2e4b26fe2d63794c96"
+  },
+  "/home/satin/Work/personal/bolao-brasileirao/README.md": {
+    "mtime": 1777740154.0624578,
+    "hash": "c3a96d619e3e9b2b603dd03513413506"
+  },
+  "/home/satin/Work/personal/bolao-brasileirao/apps/web/README.md": {
+    "mtime": 1777740154.0626538,
+    "hash": "8cabf3d342cc27ba6a2902332debc154"
+  },
+  "/home/satin/Work/personal/bolao-brasileirao/apps/web/admin.html": {
+    "mtime": 1777740154.0627222,
+    "hash": "1561c96d18598b435388a6b0a2182167"
+  },
+  "/home/satin/Work/personal/bolao-brasileirao/apps/web/history.html": {
+    "mtime": 1777740154.0627222,
+    "hash": "727e660368f313514a76b6189b25f3c2"
+  },
+  "/home/satin/Work/personal/bolao-brasileirao/apps/web/index.html": {
+    "mtime": 1777740154.0627222,
+    "hash": "bcace3ea32773b83b6011040b365b92e"
+  },
+  "/home/satin/Work/personal/bolao-brasileirao/apps/web/rankings.html": {
+    "mtime": 1777740154.0631967,
+    "hash": "083b97254dfb2810c8c8574f6bad8720"
+  },
+  "/home/satin/Work/personal/bolao-brasileirao/apps/worker/README.md": {
+    "mtime": 1777740154.0644822,
+    "hash": "9e501f700d6117d53a2b97f537f952c8"
+  },
+  "/home/satin/Work/personal/bolao-brasileirao/docs/API.md": {
+    "mtime": 1777740154.0656478,
+    "hash": "664bf242b0a7d5f162d3e0694b1e7c9f"
+  },
+  "/home/satin/Work/personal/bolao-brasileirao/docs/ARCHITECTURE.md": {
+    "mtime": 1777740154.0662193,
+    "hash": "d2979b615ea2abadf6fa80a601fcb40b"
+  },
+  "/home/satin/Work/personal/bolao-brasileirao/docs/BACKEND.md": {
+    "mtime": 1777740154.0662193,
+    "hash": "72cecba97242bbd5520d78aec9eef1a7"
+  },
+  "/home/satin/Work/personal/bolao-brasileirao/docs/DATA_MODEL.md": {
+    "mtime": 1777740154.0662193,
+    "hash": "f4fc767002b3aa1a2aa9f13082514d7d"
+  },
+  "/home/satin/Work/personal/bolao-brasileirao/docs/DECISIONS_LOG.md": {
+    "mtime": 1777740154.0662193,
+    "hash": "36222be1f0067a537fdc98a640c0e3f4"
+  },
+  "/home/satin/Work/personal/bolao-brasileirao/docs/DEPLOY.md": {
+    "mtime": 1777740154.0662193,
+    "hash": "04a3a58f7da5789f4c53615a2238a82b"
+  },
+  "/home/satin/Work/personal/bolao-brasileirao/docs/FRONTEND.md": {
+    "mtime": 1777740154.0662193,
+    "hash": "831ca6229e296707ca6f8e6c3a65708e"
+  },
+  "/home/satin/Work/personal/bolao-brasileirao/docs/PROJECT_CONTEXT.md": {
+    "mtime": 1777740154.0662193,
+    "hash": "39840056ac00f7ee99b4a838de00684b"
+  },
+  "/home/satin/Work/personal/bolao-brasileirao/docs/README.md": {
+    "mtime": 1777740154.0662193,
+    "hash": "f925b9ce51fb36ed2f16b1c4fc138fa6"
+  },
+  "/home/satin/Work/personal/bolao-brasileirao/apps/web/public/favicon.svg": {
+    "mtime": 1777740154.0631967,
+    "hash": "fab264b021ec2373b720e9a3c37c3259"
+  }
+}
