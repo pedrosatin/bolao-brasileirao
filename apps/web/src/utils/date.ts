@@ -19,7 +19,7 @@ export function hasMatchStarted(utcDate: string, referenceDate?: Date): boolean 
 
   const matchDate = new Date(utcDate);
   if (Number.isNaN(matchDate.getTime())) {
-    return true;
+    return false;
   }
 
   const now = referenceDate ?? new Date();

@@ -28,8 +28,8 @@ describe('date utils', () => {
       expect(hasMatchStarted('')).toBe(false);
     });
 
-    it('returns true for invalid date string', () => {
-      expect(hasMatchStarted('invalid-date')).toBe(true);
+    it('returns false for invalid date string', () => {
+      expect(hasMatchStarted('invalid-date')).toBe(false);
     });
 
     it('returns true if current time is after match time', () => {
