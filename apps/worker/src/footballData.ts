@@ -36,8 +36,17 @@ function getCompetitionId(env: Env): string {
   return env.FOOTBALL_DATA_COMPETITION_ID || "2013";
 }
 
+function buildSecureUrl(baseUrlStr: string, path: string): string {
+  const url = new URL(`${baseUrlStr}${path}`);
+  const baseUrl = new URL(baseUrlStr);
+  if (url.origin !== baseUrl.origin) {
+    throw new Error("Invalid API URL: origin mismatch");
+  }
+  return url.toString();
+}
+
 async function fetchFromApi(env: Env, path: string): Promise<FootballMatchesResponse> {
-  const url = `${getBaseUrl(env)}${path}`;
+  const url = buildSecureUrl(getBaseUrl(env), path);
   const response = await fetch(url, {
     headers: {
       "X-Auth-Token": env.FOOTBALL_DATA_TOKEN
@@ -54,7 +63,7 @@ async function fetchFromApi(env: Env, path: string): Promise<FootballMatchesResp
 }
 
 export async function fetchCompetition(env: Env): Promise<FootballCompetitionResponse> {
-  const url = `${getBaseUrl(env)}/competitions/${getCompetitionId(env)}`;
+  const url = buildSecureUrl(getBaseUrl(env), `/competitions/${getCompetitionId(env)}`);
   const response = await fetch(url, {
     headers: {
       "X-Auth-Token": env.FOOTBALL_DATA_TOKEN

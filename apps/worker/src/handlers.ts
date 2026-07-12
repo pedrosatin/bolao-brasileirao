@@ -400,10 +400,10 @@ export async function createPredictions(
     return errorResponse("Round not found", 404);
   }
 
-  const isDev = env.ENVIRONMENT === 'development';
+  const isDevBypass = env.ENVIRONMENT === 'development' && env.DEV_BYPASS_TOKEN_CHECK === 'true';
 
   if (!submissionToken || submissionToken.trim().length === 0) {
-    if (!isDev) {
+    if (!isDevBypass) {
       return errorResponse("Submission token required", 401);
     }
   } else {
@@ -419,7 +419,7 @@ export async function createPredictions(
     }
 
     const providedHash = await sha256Hex(submissionToken.trim());
-    if (providedHash !== tokenRow.token_hash) {
+    if (!timingSafeEqual(providedHash, tokenRow.token_hash)) {
       return errorResponse("Invalid submission token", 403);
     }
   }
@@ -479,14 +479,14 @@ export async function createPredictions(
 }
 
 function requireOriginAllowed(request: Request, env: Env): Response | null {
-  const origin = request.headers.get("Origin");
-  if (!origin) {
-    return null;
-  }
-
   const allowed = parseAllowedOrigins(env.CORS_ORIGINS);
   if (allowed.includes("*")) {
     return null;
+  }
+
+  const origin = request.headers.get("Origin");
+  if (!origin) {
+    return errorResponse("Missing Origin header", 403);
   }
 
   if (!allowed.includes(origin)) {
@@ -524,7 +524,7 @@ async function requireAdmin(request: Request, env: Env): Promise<Response | null
   // Timing-safe comparison via constant-time SHA-256 hash comparison
   const expectedHash = await sha256Hex(expected);
   const providedHash = await sha256Hex(provided);
-  if (expectedHash !== providedHash) {
+  if (!timingSafeEqual(expectedHash, providedHash)) {
     return errorResponse("Invalid request", 401);
   }
 
@@ -542,6 +542,17 @@ async function sha256Hex(value: string): Promise<string> {
   const data = new TextEncoder().encode(value);
   const digest = await crypto.subtle.digest("SHA-256", data);
   return toHex(digest);
+}
+
+function timingSafeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) {
+    return false;
+  }
+  let result = 0;
+  for (let i = 0; i < a.length; i++) {
+    result |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+  return result === 0;
 }
 
 function base64UrlEncode(bytes: Uint8Array): string {
