@@ -28,6 +28,9 @@ jobs:
           VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL || vars.VITE_API_BASE_URL }}
         run: npm run build
 
+      - name: Remove .gitignore to prevent wrangler from ignoring assets
+        run: rm -f .gitignore
+
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/pages-action@v1
         with:
@@ -35,3 +38,4 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID || vars.CLOUDFLARE_ACCOUNT_ID }}
           projectName: ${{ secrets.CLOUDFLARE_PAGES_PROJECT || vars.CLOUDFLARE_PAGES_PROJECT }}
           directory: apps/web/dist
+          wranglerVersion: '3'
