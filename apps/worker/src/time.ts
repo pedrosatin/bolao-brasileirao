@@ -11,7 +11,7 @@ function toUtcFromBrasilia(date: Date): Date {
 // Computes next Tuesday at 17:00 BRT, returning UTC ISO string.
 export function getNextTuesdayCutoffUtcIso(nowUtc: Date): string {
   const nowBrt = toBrasiliaTime(nowUtc);
-  const dayOfWeek = nowBrt.getDay();
+  const dayOfWeek = nowBrt.getUTCDay();
   const tuesday = 2;
 
   let daysToAdd = (tuesday - dayOfWeek + 7) % 7;
@@ -19,14 +19,14 @@ export function getNextTuesdayCutoffUtcIso(nowUtc: Date): string {
 
   if (daysToAdd === 0) {
     const isAfterCutoff =
-      nowBrt.getHours() > 17 || (nowBrt.getHours() === 17 && nowBrt.getMinutes() > 0);
+      nowBrt.getUTCHours() > 17 || (nowBrt.getUTCHours() === 17 && nowBrt.getUTCMinutes() > 0);
     if (isAfterCutoff) {
       daysToAdd = 7;
     }
   }
 
-  cutoffBrt.setDate(cutoffBrt.getDate() + daysToAdd);
-  cutoffBrt.setHours(17, 0, 0, 0);
+  cutoffBrt.setUTCDate(cutoffBrt.getUTCDate() + daysToAdd);
+  cutoffBrt.setUTCHours(17, 0, 0, 0);
 
   const cutoffUtc = toUtcFromBrasilia(cutoffBrt);
   return cutoffUtc.toISOString();
