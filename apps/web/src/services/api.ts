@@ -15,9 +15,8 @@ function resolveApiBaseUrl(): string {
   );
 }
 
-const baseUrl = resolveApiBaseUrl();
-
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
+  const baseUrl = resolveApiBaseUrl();
   const response = await fetch(`${baseUrl}${path}`, {
     headers: {
       "Content-Type": "application/json"
