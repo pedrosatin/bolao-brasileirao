@@ -2,12 +2,12 @@ import { describe, it, expect } from "vitest";
 import { withCors } from "./http";
 
 describe("withCors", () => {
-  it("should echo the Origin header when CORS_ORIGINS is *", () => {
+  it("should return * when CORS_ORIGINS is *", () => {
     const req = new Request("http://localhost", { headers: { Origin: "https://example.com" } });
     const res = new Response("ok");
     const corsRes = withCors(req, { CORS_ORIGINS: "*" }, res);
 
-    expect(corsRes.headers.get("Access-Control-Allow-Origin")).toBe("https://example.com");
+    expect(corsRes.headers.get("Access-Control-Allow-Origin")).toBe("*");
   });
 
   it("should return * when CORS_ORIGINS is * and no Origin is provided", () => {
