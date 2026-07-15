@@ -724,6 +724,9 @@ export async function syncFinishedMatchesAndScores(env: Env): Promise<void> {
   const apiData = await fetchFinishedMatches(env);
   const nowIso = new Date().toISOString();
 
+  const statements: any[] = [];
+  const processedRoundIds = new Set<number>();
+
   for (const match of apiData.matches) {
     const stored = await env.DB
       .prepare(
@@ -739,12 +742,13 @@ export async function syncFinishedMatchesAndScores(env: Env): Promise<void> {
     const homeScore = match.score.fullTime.home;
     const awayScore = match.score.fullTime.away;
 
-    await env.DB
-      .prepare(
-        "UPDATE matches SET status = ?, home_score = ?, away_score = ?, updated_at = ? WHERE id = ?"
-      )
-      .bind(match.status, homeScore, awayScore, nowIso, stored.id)
-      .run();
+    statements.push(
+      env.DB
+        .prepare(
+          "UPDATE matches SET status = ?, home_score = ?, away_score = ?, updated_at = ? WHERE id = ?"
+        )
+        .bind(match.status, homeScore, awayScore, nowIso, stored.id)
+    );
 
     const predictions = await env.DB
       .prepare(
@@ -765,26 +769,37 @@ export async function syncFinishedMatchesAndScores(env: Env): Promise<void> {
         actualAway: awayScore
       });
 
-      await env.DB
-        .prepare("UPDATE predictions SET points = ?, updated_at = ? WHERE id = ?")
-        .bind(points, nowIso, prediction.id)
-        .run();
+      statements.push(
+        env.DB
+          .prepare("UPDATE predictions SET points = ?, updated_at = ? WHERE id = ?")
+          .bind(points, nowIso, prediction.id)
+      );
     }
 
-    await env.DB
-      .prepare(
-        "DELETE FROM scores WHERE round_id = ?"
-      )
-      .bind(stored.round_id)
-      .run();
+    processedRoundIds.add(stored.round_id);
+  }
 
-    await env.DB
-      .prepare(
-        "INSERT INTO scores (round_id, participant_name, points_total, created_at, updated_at) " +
-        "SELECT round_id, participant_name, SUM(points) as points_total, ?, ? " +
-        "FROM predictions WHERE round_id = ? GROUP BY participant_name"
-      )
-      .bind(nowIso, nowIso, stored.round_id)
-      .run();
+  for (const roundId of processedRoundIds) {
+    statements.push(
+      env.DB
+        .prepare("DELETE FROM scores WHERE round_id = ?")
+        .bind(roundId)
+    );
+
+    statements.push(
+      env.DB
+        .prepare(
+          "INSERT INTO scores (round_id, participant_name, points_total, created_at, updated_at) " +
+          "SELECT round_id, participant_name, SUM(points) as points_total, ?, ? " +
+          "FROM predictions WHERE round_id = ? GROUP BY participant_name"
+        )
+        .bind(nowIso, nowIso, roundId)
+    );
+  }
+
+  // Execute in chunks to respect D1 limits
+  for (let i = 0; i < statements.length; i += 100) {
+    const chunk = statements.slice(i, i + 100);
+    await env.DB.batch(chunk);
   }
 }
