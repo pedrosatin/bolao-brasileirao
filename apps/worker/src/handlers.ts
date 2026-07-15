@@ -14,7 +14,7 @@ import {
   getLatestRound,
   getMatchesByRoundId,
   getSubmissionTokenByRoundId,
-  upsertMatch,
+  upsertMatches,
   upsertRound,
   upsertSubmissionToken
 } from "./db";
@@ -87,19 +87,20 @@ async function persistAndRespond(
 ): Promise<Response> {
   const cutoffAt = getNextTuesdayCutoffUtcIso(now);
   const round = await upsertRound(env.DB, season, matchday, cutoffAt, nowIso, nowIso);
-  for (const match of apiMatches) {
-    await upsertMatch(env.DB, {
-      round_id: round.id,
-      api_match_id: match.id,
-      utc_date: match.utcDate,
-      status: match.status,
-      home_team: match.homeTeam.name,
-      away_team: match.awayTeam.name,
-      home_score: match.score.fullTime.home,
-      away_score: match.score.fullTime.away,
-      external_link: env.DEFAULT_EXTERNAL_LINK || DEFAULT_LINK
-    }, nowIso);
-  }
+
+  const matchInputs = apiMatches.map(match => ({
+    round_id: round.id,
+    api_match_id: match.id,
+    utc_date: match.utcDate,
+    status: match.status,
+    home_team: match.homeTeam.name,
+    away_team: match.awayTeam.name,
+    home_score: match.score.fullTime.home,
+    away_score: match.score.fullTime.away,
+    external_link: env.DEFAULT_EXTERNAL_LINK || DEFAULT_LINK
+  }));
+  await upsertMatches(env.DB, matchInputs, nowIso);
+
   const stored = await getMatchesByRoundId(env.DB, round.id);
   return roundJsonResponse(round, stored);
 }
