@@ -1,5 +1,5 @@
 import { Env } from "./index";
-import { jsonResponse, errorResponse } from "./http";
+import { jsonResponse, errorResponse, parseAllowedOrigins } from "./http";
 import { parsePredictionsPayload } from "./validation";
 import {
   fetchScheduledMatches,
@@ -494,19 +494,6 @@ function requireOriginAllowed(request: Request, env: Env): Response | null {
   }
 
   return null;
-}
-
-function parseAllowedOrigins(value?: string): string[] {
-  if (!value) {
-    return [];
-  }
-
-  const origins = value
-    .split(",")
-    .map((s) => s.trim())
-    .filter(Boolean);
-
-  return origins.length > 0 ? origins : [];
 }
 
 async function requireAdmin(request: Request, env: Env): Promise<Response | null> {

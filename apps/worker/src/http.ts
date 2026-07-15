@@ -2,7 +2,7 @@ type CorsEnv = {
   CORS_ORIGINS?: string;
 };
 
-function parseAllowedOrigins(value?: string): string[] {
+export function parseAllowedOrigins(value?: string): string[] {
   if (!value) {
     return [];
   }
