@@ -280,19 +280,24 @@ export async function recalculateRoundScores(
   const nowIso = new Date().toISOString();
 
   const apiData = await fetchMatchesByMatchday(env, round.round_number);
+
+  const updateStatements = [];
   for (const apiMatch of apiData.matches) {
     if (apiMatch.status !== "FINISHED") continue;
     const homeScore = apiMatch.score.fullTime.home;
     const awayScore = apiMatch.score.fullTime.away;
     if (homeScore === null || awayScore === null) continue;
 
-    await env.DB
-      .prepare(
+    updateStatements.push(
+      env.DB.prepare(
         "UPDATE matches SET status = 'FINISHED', home_score = ?, away_score = ?, updated_at = ? " +
         "WHERE api_match_id = ? AND round_id = ?"
-      )
-      .bind(homeScore, awayScore, nowIso, apiMatch.id, roundId)
-      .run();
+      ).bind(homeScore, awayScore, nowIso, apiMatch.id, roundId)
+    );
+  }
+
+  if (updateStatements.length > 0) {
+    await env.DB.batch(updateStatements);
   }
 
   const matches = await env.DB
