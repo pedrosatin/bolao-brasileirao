@@ -713,8 +713,9 @@ export async function getGlobalRanking(
   const result = await env.DB
     .prepare(
       "SELECT participant_name as name, SUM(points) as points " +
-      "FROM predictions GROUP BY participant_name ORDER BY points DESC, name ASC"
+      "FROM predictions GROUP BY participant_name ORDER BY points DESC, name ASC LIMIT ?"
     )
+    .bind(100)
     .all<{ name: string; points: number }>();
 
   return jsonResponse({ ranking: result.results ?? [] });
