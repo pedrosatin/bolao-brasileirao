@@ -450,16 +450,7 @@ export async function createPredictions(
     return errorResponse("One or more matches are invalid for this round", 400);
   }
 
-  const matchesById = new Map(fetchedMatches.map((match) => [match.id, match]));
   const nowUtc = new Date();
-
-  for (const prediction of predictions) {
-    const match = matchesById.get(prediction.matchId);
-    if (!match) {
-      return errorResponse("One or more matches are invalid for this round", 400);
-    }
-  }
-
   const nowIso = nowUtc.toISOString();
   const statements = predictions.map((prediction) =>
     env.DB
