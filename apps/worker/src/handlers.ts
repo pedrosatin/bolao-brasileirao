@@ -310,33 +310,49 @@ export async function recalculateRoundScores(
     return errorResponse("No finished matches to recalculate", 400);
   }
 
-  for (const match of finishedMatches) {
-    await env.DB
-      .prepare(
-        "UPDATE matches SET status = 'FINISHED', updated_at = ? WHERE id = ?"
-      )
-      .bind(nowIso, match.id)
-      .run();
+  for (let matchIndex = 0; matchIndex < finishedMatches.length; matchIndex += 50) {
+    const matchChunk = finishedMatches.slice(matchIndex, matchIndex + 50);
+    const matchIds = matchChunk.map(m => m.id);
+    const placeholders = matchIds.map(() => "?").join(", ");
 
     const predictions = await env.DB
       .prepare(
-        "SELECT id, pred_home_score, pred_away_score FROM predictions WHERE match_id = ?"
+        `SELECT id, match_id, pred_home_score, pred_away_score FROM predictions WHERE match_id IN (${placeholders})`
       )
-      .bind(match.id)
-      .all<{ id: number; pred_home_score: number; pred_away_score: number }>();
+      .bind(...matchIds)
+      .all<{ id: number; match_id: number; pred_home_score: number; pred_away_score: number }>();
+
+    const matchById = new Map(matchChunk.map((m) => [m.id, m]));
+
+    const statements: D1PreparedStatement[] = [];
+
+    for (const match of matchChunk) {
+      statements.push(
+        env.DB.prepare(
+          "UPDATE matches SET status = 'FINISHED', updated_at = ? WHERE id = ?"
+        ).bind(nowIso, match.id)
+      );
+    }
 
     for (const prediction of predictions.results ?? []) {
+      const match = matchById.get(prediction.match_id);
+      if (!match || match.home_score === null || match.away_score === null) continue;
+
       const points = calculatePoints({
         predictedHome: prediction.pred_home_score,
         predictedAway: prediction.pred_away_score,
-        actualHome: match.home_score as number,
-        actualAway: match.away_score as number
+        actualHome: match.home_score,
+        actualAway: match.away_score
       });
 
-      await env.DB
-        .prepare("UPDATE predictions SET points = ?, updated_at = ? WHERE id = ?")
-        .bind(points, nowIso, prediction.id)
-        .run();
+      statements.push(
+        env.DB.prepare("UPDATE predictions SET points = ?, updated_at = ? WHERE id = ?")
+          .bind(points, nowIso, prediction.id)
+      );
+    }
+
+    for (let i = 0; i < statements.length; i += 50) {
+      await env.DB.batch(statements.slice(i, i + 50));
     }
   }
 
@@ -724,67 +740,102 @@ export async function syncFinishedMatchesAndScores(env: Env): Promise<void> {
   const apiData = await fetchFinishedMatches(env);
   const nowIso = new Date().toISOString();
 
-  for (const match of apiData.matches) {
-    const stored = await env.DB
+  for (let matchIndex = 0; matchIndex < apiData.matches.length; matchIndex += 50) {
+    const apiMatchesChunk = apiData.matches.slice(matchIndex, matchIndex + 50);
+    const apiMatchIds = apiMatchesChunk.map(m => m.id);
+    if (apiMatchIds.length === 0) continue;
+
+    const placeholders = apiMatchIds.map(() => "?").join(", ");
+    const storedMatches = await env.DB
       .prepare(
-        "SELECT id, round_id, home_score, away_score FROM matches WHERE api_match_id = ?"
+        `SELECT id, round_id, api_match_id, home_score, away_score FROM matches WHERE api_match_id IN (${placeholders})`
       )
-      .bind(match.id)
-      .first<{ id: number; round_id: number; home_score: number | null; away_score: number | null }>();
+      .bind(...apiMatchIds)
+      .all<{ id: number; round_id: number; api_match_id: number; home_score: number | null; away_score: number | null }>();
 
-    if (!stored) {
-      continue;
-    }
+    const storedMatchesMap = new Map(storedMatches.results?.map(m => [m.api_match_id, m]));
 
-    const homeScore = match.score.fullTime.home;
-    const awayScore = match.score.fullTime.away;
+    const matchesToProcess = apiMatchesChunk
+      .map(match => ({ apiMatch: match, stored: storedMatchesMap.get(match.id) }))
+      .filter((m): m is { apiMatch: typeof apiMatchesChunk[0], stored: NonNullable<typeof m.stored> } => !!m.stored);
 
-    await env.DB
-      .prepare(
-        "UPDATE matches SET status = ?, home_score = ?, away_score = ?, updated_at = ? WHERE id = ?"
-      )
-      .bind(match.status, homeScore, awayScore, nowIso, stored.id)
-      .run();
+    if (matchesToProcess.length === 0) continue;
+
+    const storedMatchIds = matchesToProcess.map(m => m.stored.id);
+    const predictionPlaceholders = storedMatchIds.map(() => "?").join(", ");
 
     const predictions = await env.DB
       .prepare(
-        "SELECT id, pred_home_score, pred_away_score FROM predictions WHERE match_id = ?"
+        `SELECT id, match_id, pred_home_score, pred_away_score FROM predictions WHERE match_id IN (${predictionPlaceholders})`
       )
-      .bind(stored.id)
-      .all<{ id: number; pred_home_score: number; pred_away_score: number }>();
+      .bind(...storedMatchIds)
+      .all<{ id: number; match_id: number; pred_home_score: number; pred_away_score: number }>();
 
-    for (const prediction of predictions.results ?? []) {
-      if (homeScore === null || awayScore === null) {
-        continue;
-      }
+    const statements: D1PreparedStatement[] = [];
+    const roundIdsToUpdate = new Set<number>();
 
-      const points = calculatePoints({
-        predictedHome: prediction.pred_home_score,
-        predictedAway: prediction.pred_away_score,
-        actualHome: homeScore,
-        actualAway: awayScore
-      });
+    for (const { apiMatch, stored } of matchesToProcess) {
+      const homeScore = apiMatch.score.fullTime.home;
+      const awayScore = apiMatch.score.fullTime.away;
 
-      await env.DB
-        .prepare("UPDATE predictions SET points = ?, updated_at = ? WHERE id = ?")
-        .bind(points, nowIso, prediction.id)
-        .run();
+      statements.push(
+        env.DB.prepare(
+          "UPDATE matches SET status = ?, home_score = ?, away_score = ?, updated_at = ? WHERE id = ?"
+        ).bind(apiMatch.status, homeScore, awayScore, nowIso, stored.id)
+      );
+
+      roundIdsToUpdate.add(stored.round_id);
     }
 
-    await env.DB
-      .prepare(
-        "DELETE FROM scores WHERE round_id = ?"
-      )
-      .bind(stored.round_id)
-      .run();
+    const predictionsByMatchId = new Map<number, typeof predictions.results>();
+    for (const prediction of predictions.results ?? []) {
+      const list = predictionsByMatchId.get(prediction.match_id) || [];
+      list.push(prediction);
+      predictionsByMatchId.set(prediction.match_id, list);
+    }
 
-    await env.DB
-      .prepare(
-        "INSERT INTO scores (round_id, participant_name, points_total, created_at, updated_at) " +
-        "SELECT round_id, participant_name, SUM(points) as points_total, ?, ? " +
-        "FROM predictions WHERE round_id = ? GROUP BY participant_name"
-      )
-      .bind(nowIso, nowIso, stored.round_id)
-      .run();
+    for (const { apiMatch, stored } of matchesToProcess) {
+      const homeScore = apiMatch.score.fullTime.home;
+      const awayScore = apiMatch.score.fullTime.away;
+
+      if (homeScore === null || awayScore === null) continue;
+
+      const matchPredictions = predictionsByMatchId.get(stored.id) ?? [];
+      for (const prediction of matchPredictions) {
+        const points = calculatePoints({
+          predictedHome: prediction.pred_home_score,
+          predictedAway: prediction.pred_away_score,
+          actualHome: homeScore,
+          actualAway: awayScore
+        });
+
+        statements.push(
+          env.DB.prepare("UPDATE predictions SET points = ?, updated_at = ? WHERE id = ?")
+            .bind(points, nowIso, prediction.id)
+        );
+      }
+    }
+
+    for (let i = 0; i < statements.length; i += 50) {
+      await env.DB.batch(statements.slice(i, i + 50));
+    }
+
+    const scoreStatements: D1PreparedStatement[] = [];
+    for (const roundId of roundIdsToUpdate) {
+      scoreStatements.push(
+        env.DB.prepare("DELETE FROM scores WHERE round_id = ?").bind(roundId)
+      );
+      scoreStatements.push(
+        env.DB.prepare(
+          "INSERT INTO scores (round_id, participant_name, points_total, created_at, updated_at) " +
+          "SELECT round_id, participant_name, SUM(points) as points_total, ?, ? " +
+          "FROM predictions WHERE round_id = ? GROUP BY participant_name"
+        ).bind(nowIso, nowIso, roundId)
+      );
+    }
+
+    for (let i = 0; i < scoreStatements.length; i += 50) {
+      await env.DB.batch(scoreStatements.slice(i, i + 50));
+    }
   }
 }
