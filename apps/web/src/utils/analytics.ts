@@ -1,4 +1,6 @@
 // Extend the global Window interface to type the dataLayer array pushed by GTM.
+import { isDev } from './env'
+
 declare global {
   interface Window {
     dataLayer: Record<string, unknown>[]
@@ -6,8 +8,6 @@ declare global {
 }
 
 type EventParams = Record<string, string | number | boolean | null | undefined>
-
-const isDev = import.meta.env.DEV
 
 /**
  * Track a custom event.
