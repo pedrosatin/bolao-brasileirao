@@ -74,16 +74,19 @@ export async function upsertRound(
   return result;
 }
 
-export async function upsertMatch(db: D1Database, input: Omit<MatchRow, "id">, nowIso: string) {
-  await db
-    .prepare(
-      "INSERT INTO matches (round_id, api_match_id, utc_date, status, home_team, away_team, home_score, away_score, external_link, created_at, updated_at) " +
-      "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) " +
-      "ON CONFLICT(api_match_id) DO UPDATE SET " +
-      "round_id = excluded.round_id, utc_date = excluded.utc_date, status = excluded.status, home_team = excluded.home_team, " +
-      "away_team = excluded.away_team, home_score = excluded.home_score, away_score = excluded.away_score, external_link = excluded.external_link, updated_at = excluded.updated_at"
-    )
-    .bind(
+export async function upsertMatches(db: D1Database, inputs: Omit<MatchRow, "id">[], nowIso: string) {
+  if (inputs.length === 0) return;
+
+  const stmt = db.prepare(
+    "INSERT INTO matches (round_id, api_match_id, utc_date, status, home_team, away_team, home_score, away_score, external_link, created_at, updated_at) " +
+    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) " +
+    "ON CONFLICT(api_match_id) DO UPDATE SET " +
+    "round_id = excluded.round_id, utc_date = excluded.utc_date, status = excluded.status, home_team = excluded.home_team, " +
+    "away_team = excluded.away_team, home_score = excluded.home_score, away_score = excluded.away_score, external_link = excluded.external_link, updated_at = excluded.updated_at"
+  );
+
+  const stmts = inputs.map((input) =>
+    stmt.bind(
       input.round_id,
       input.api_match_id,
       input.utc_date,
@@ -96,7 +99,9 @@ export async function upsertMatch(db: D1Database, input: Omit<MatchRow, "id">, n
       nowIso,
       nowIso
     )
-    .run();
+  );
+
+  await db.batch(stmts);
 }
 
 export async function getMatchesByRoundId(db: D1Database, roundId: number): Promise<MatchRow[]> {
