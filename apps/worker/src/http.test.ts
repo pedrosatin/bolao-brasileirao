@@ -1,5 +1,34 @@
 import { describe, it, expect } from "vitest";
-import { withCors } from "./http";
+import { withCors, parseJsonBody } from "./http";
+
+describe("parseJsonBody", () => {
+  it("should return null if request has no body", async () => {
+    const req = new Request("http://localhost", { method: "GET" });
+    const result = await parseJsonBody(req);
+    expect(result).toBeNull();
+  });
+
+  it("should return parsed JSON if body is valid", async () => {
+    const data = { key: "value" };
+    const req = new Request("http://localhost", {
+      method: "POST",
+      body: JSON.stringify(data),
+      headers: { "Content-Type": "application/json" }
+    });
+    const result = await parseJsonBody(req);
+    expect(result).toEqual(data);
+  });
+
+  it("should return null if body is invalid JSON", async () => {
+    const req = new Request("http://localhost", {
+      method: "POST",
+      body: "{ invalid_json: ",
+      headers: { "Content-Type": "application/json" }
+    });
+    const result = await parseJsonBody(req);
+    expect(result).toBeNull();
+  });
+});
 
 describe("withCors", () => {
   it("should echo the Origin header when CORS_ORIGINS is *", () => {
