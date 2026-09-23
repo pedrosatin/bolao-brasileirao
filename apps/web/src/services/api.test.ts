@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { fetchNextRound } from './api';
 
 const fetchMock = vi.fn();
-global.fetch = fetchMock;
+globalThis.fetch = fetchMock;
 
 describe('api service', () => {
   beforeEach(() => {
