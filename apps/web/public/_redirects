@@ -1,4 +1,2 @@
-/rankings /rankings.html 200!
-/history /history.html 200!
-/admin /admin.html 200!
-/* /index.html 200
+# Legacy MVP: send all traffic to the Palpitae Brasileirão guide.
+/* https://palpitae.com.br/guias/bolao-do-brasileirao/ 301
